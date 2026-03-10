@@ -1,0 +1,1062 @@
+/* ============================================
+   LANCER Fabricator - Styles
+   Matches LANCER system's industrial/military aesthetic
+   ============================================ */
+
+.fabricator-app {
+  font-family: "Roboto Condensed", "Helvetica Neue", sans-serif;
+}
+
+/* ---- Header ---- */
+
+.fabricator-talent-dice .fabricator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0 8px;
+  border-bottom: 2px solid #e74c3c;
+  margin-bottom: 8px;
+}
+
+.fabricator-talent-dice .fabricator-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #e74c3c;
+}
+
+.fabricator-header-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.fabricator-header-controls button {
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.fabricator-header-controls button:hover {
+  background: #3a3a3a;
+  color: #fff;
+}
+
+/* ---- Tracker Card ---- */
+
+.fabricator-tracker {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-left: 3px solid #e74c3c;
+  margin-bottom: 8px;
+  padding: 8px;
+}
+
+.fabricator-tracker.fabricator-pattern-countdown {
+  border-left-color: #e74c3c;
+}
+
+.fabricator-tracker.fabricator-pattern-countup {
+  border-left-color: #3498db;
+}
+
+.fabricator-tracker.fabricator-pattern-pool {
+  border-left-color: #f39c12;
+}
+
+.fabricator-tracker-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.fabricator-die-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #eee;
+  text-transform: uppercase;
+}
+
+.fabricator-talent-name {
+  font-size: 11px;
+  color: #999;
+}
+
+.fabricator-source {
+  font-size: 10px;
+  color: #666;
+  margin-left: auto;
+  font-style: italic;
+}
+
+.fabricator-lock-badge {
+  font-size: 10px;
+  background: #e67e22;
+  color: #000;
+  padding: 1px 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ---- Die Display ---- */
+
+.fabricator-die-display {
+  text-align: center;
+  padding: 6px 0;
+  font-size: 16px;
+}
+
+.fabricator-pips {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.fabricator-pip {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #888;
+  background: transparent;
+}
+
+.fabricator-pip.filled {
+  background: #e74c3c;
+  border-color: #c0392b;
+}
+
+.fabricator-pattern-countup .fabricator-pip.filled {
+  background: #3498db;
+  border-color: #2980b9;
+}
+
+.fabricator-pattern-pool .fabricator-pip.filled {
+  background: #f39c12;
+  border-color: #d68910;
+}
+
+.fabricator-die-label {
+  font-size: 13px;
+  color: #aaa;
+  margin-left: 8px;
+  font-weight: 700;
+}
+
+.fabricator-die-numeric {
+  font-size: 28px;
+  font-weight: 700;
+  color: #3498db;
+}
+
+/* ---- Controls ---- */
+
+.fabricator-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.fabricator-controls button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+
+.fabricator-controls button:hover:not(:disabled) {
+  background: #3a3a3a;
+  color: #fff;
+  border-color: #888;
+}
+
+.fabricator-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fabricator-controls button i {
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fabricator-spend-desc {
+  font-size: 10px;
+  color: #888;
+  margin-left: auto;
+}
+
+/* Trigger button — glowing when ready */
+
+.fabricator-trigger-ready {
+  background: #c0392b !important;
+  border-color: #e74c3c !important;
+  color: #fff !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  animation: fabricator-pulse 1.5s infinite;
+}
+
+@keyframes fabricator-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(231, 76, 60, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(231, 76, 60, 0.8); }
+}
+
+/* Distributed dice entries */
+
+.fabricator-distributed-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 8px;
+  background: #222;
+  font-size: 11px;
+  color: #ccc;
+}
+
+.fabricator-distributed-entry button {
+  padding: 1px 4px;
+  font-size: 10px;
+}
+
+/* ---- Footer ---- */
+
+.fabricator-tracker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid #333;
+}
+
+.fabricator-reset-info {
+  font-size: 10px;
+  color: #666;
+}
+
+.fabricator-tracker-footer button {
+  font-size: 10px;
+  padding: 1px 6px;
+  border: 1px solid #444;
+  background: #222;
+  color: #888;
+  cursor: pointer;
+}
+
+.fabricator-tracker-footer button:hover {
+  color: #ccc;
+  border-color: #666;
+}
+
+/* ---- No Trackers State ---- */
+
+.fabricator-no-trackers {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.fabricator-no-trackers .hint {
+  font-size: 11px;
+  color: #666;
+}
+
+/* ---- Received Dice Section ---- */
+
+.fabricator-received-section {
+  background: #1a1a1a;
+  border: 1px solid #f39c12;
+  border-left: 3px solid #f39c12;
+  margin-top: 8px;
+  padding: 8px;
+}
+
+/* ---- Chat Cards ---- */
+
+.fabricator-chat-card {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-left: 3px solid #e74c3c;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+.fabricator-die-header {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.fabricator-trigger-alert {
+  background: #c0392b;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  margin: 4px 0;
+  text-align: center;
+}
+
+.fabricator-trigger-card {
+  border-left-color: #f39c12;
+}
+
+.fabricator-trigger-damage {
+  text-align: center;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.fabricator-spend-info {
+  font-size: 12px;
+  color: #ccc;
+  padding: 2px 0;
+}
+
+.fabricator-die-value {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+}
+
+/* ---- Pre-Attack Prompt ---- */
+
+.fabricator-preattack-form {
+  padding: 4px 0;
+}
+
+.fabricator-preattack-hint {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.fabricator-preattack-option {
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-left: 3px solid #f39c12;
+}
+
+.fabricator-preattack-option label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.fabricator-preattack-option input[type="checkbox"] {
+  flex-shrink: 0;
+}
+
+/* ---- Post-Attack Confirmation ---- */
+
+.fabricator-postattack-form {
+  padding: 4px 0;
+}
+
+.fabricator-postattack-hint {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.fabricator-suggestion {
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-left: 3px solid #3498db;
+}
+
+.fabricator-suggestion label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.fabricator-suggestion input[type="checkbox"] {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.fabricator-suggestion-hint {
+  display: block;
+  font-size: 10px;
+  color: #e67e22;
+  margin-left: 24px;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* ---- Macro Creation Dialog ---- */
+
+.fabricator-macro-form {
+  padding: 4px 0;
+}
+
+.fabricator-macro-row {
+  padding: 4px 8px;
+  margin-bottom: 2px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.fabricator-macro-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.fabricator-macro-hint {
+  font-size: 10px;
+  color: #888;
+  margin-left: auto;
+}
+
+/* ============================================
+   Deployable Workshop Sheet
+   ============================================ */
+
+.fabricator-deployable-sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: "Roboto Condensed", "Helvetica Neue", sans-serif;
+}
+
+/* ---- Sheet Header ---- */
+
+.fabricator-deploy-header {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: #111;
+  border-bottom: 2px solid #e74c3c;
+}
+
+.fabricator-deploy-header .profile-img {
+  border: 2px solid #444;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.fabricator-deploy-header .header-fields {
+  flex: 1;
+  min-width: 0;
+}
+
+.fabricator-deploy-header h1 {
+  margin: 0;
+  border: none;
+}
+
+.fabricator-deploy-header h1 input {
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #eee;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.fabricator-deploy-header h1 input:focus {
+  border-bottom-color: #e74c3c;
+  outline: none;
+}
+
+.fabricator-deploy-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.fabricator-deployer {
+  font-size: 11px;
+  color: #999;
+}
+
+.fabricator-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.fabricator-header-actions button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #444;
+  background: #222;
+  color: #999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fabricator-header-actions button:hover {
+  background: #333;
+  color: #fff;
+  border-color: #e74c3c;
+}
+
+/* ---- Sync Protection Badge ---- */
+
+.fabricator-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #e67e22;
+  background: rgba(230, 126, 34, 0.15);
+  border: 1px solid rgba(230, 126, 34, 0.3);
+  padding: 1px 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fabricator-sync-badge button {
+  background: none;
+  border: none;
+  color: #e67e22;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 10px;
+}
+
+.fabricator-sync-badge button:hover {
+  color: #fff;
+}
+
+/* ---- Sheet Tabs ---- */
+
+.fabricator-deployable-sheet .sheet-tabs {
+  display: flex;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+}
+
+.fabricator-deployable-sheet .sheet-tabs .item {
+  flex: 1;
+  text-align: center;
+  padding: 6px 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.fabricator-deployable-sheet .sheet-tabs .item:hover {
+  color: #ccc;
+  background: #222;
+}
+
+.fabricator-deployable-sheet .sheet-tabs .item.active {
+  color: #e74c3c;
+  border-bottom-color: #e74c3c;
+}
+
+.fabricator-deployable-sheet .sheet-tabs .item i {
+  margin-right: 4px;
+}
+
+/* ---- Sheet Body ---- */
+
+.fabricator-deployable-sheet .sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.fabricator-deployable-sheet .tab {
+  display: none;
+}
+
+.fabricator-deployable-sheet .tab.active {
+  display: block;
+}
+
+/* ---- Stats Grid ---- */
+
+.fabricator-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.fabricator-stat-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 6px;
+  text-align: center;
+}
+
+.fabricator-stat-card label {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.fabricator-stat-card input {
+  width: 100%;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #eee;
+  background: #111;
+  border: 1px solid #333;
+  padding: 4px;
+}
+
+.fabricator-stat-card input:focus {
+  border-color: #e74c3c;
+  outline: none;
+}
+
+.fabricator-stat-card input.fabricator-hp-input {
+  font-size: 14px;
+  font-family: monospace;
+}
+
+/* HP formula spans full width */
+.fabricator-stat-card:first-child {
+  grid-column: 1 / -1;
+}
+
+/* Override indicator */
+
+.fabricator-override-list {
+  margin-top: 8px;
+  padding: 6px;
+  background: rgba(230, 126, 34, 0.1);
+  border: 1px solid rgba(230, 126, 34, 0.2);
+  font-size: 10px;
+}
+
+.fabricator-override-label {
+  color: #e67e22;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.fabricator-override-path {
+  display: inline-block;
+  background: rgba(230, 126, 34, 0.2);
+  padding: 1px 4px;
+  margin: 1px;
+  color: #e67e22;
+  font-family: monospace;
+  font-size: 9px;
+}
+
+/* ---- Action Cards ---- */
+
+.fabricator-action-card {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-left: 3px solid #e74c3c;
+  margin-bottom: 6px;
+  padding: 6px;
+}
+
+.fabricator-action-header {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.fabricator-action-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: #eee;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  padding: 2px 4px;
+}
+
+.fabricator-action-name:focus {
+  border-bottom-color: #e74c3c;
+  outline: none;
+}
+
+.fabricator-action-type {
+  font-size: 11px;
+  background: #222;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 2px 4px;
+}
+
+.fabricator-delete-action {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #444;
+  background: #222;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fabricator-delete-action:hover {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.fabricator-action-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #999;
+}
+
+.fabricator-action-trigger label {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.fabricator-action-trigger input {
+  flex: 1;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  color: #ccc;
+  padding: 2px;
+}
+
+.fabricator-action-detail {
+  margin-top: 4px;
+}
+
+.fabricator-action-detail textarea {
+  width: 100%;
+  min-height: 48px;
+  font-size: 11px;
+  background: #111;
+  border: 1px solid #333;
+  color: #ccc;
+  padding: 4px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.fabricator-action-detail textarea:focus {
+  border-color: #e74c3c;
+  outline: none;
+}
+
+.fabricator-add-action {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  border: 1px dashed #444;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.fabricator-add-action:hover {
+  color: #ccc;
+  border-color: #888;
+}
+
+/* ---- Detail Editor ---- */
+
+.fabricator-detail-editor {
+  height: 100%;
+  min-height: 300px;
+}
+
+.fabricator-detail-editor .editor {
+  height: 100%;
+}
+
+/* ---- Config Tab ---- */
+
+.fabricator-fieldset {
+  border: 1px solid #333;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.fabricator-fieldset legend {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #e74c3c;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.fabricator-activation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.fabricator-activation-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fabricator-activation-grid label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 700;
+}
+
+.fabricator-activation-grid select {
+  font-size: 12px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 4px;
+}
+
+/* Tags */
+
+.fabricator-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.fabricator-tag-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #222;
+  border: 1px solid #444;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #ccc;
+}
+
+.fabricator-delete-tag {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+  font-size: 9px;
+}
+
+.fabricator-delete-tag:hover {
+  color: #e74c3c;
+}
+
+.fabricator-add-tag,
+.fabricator-add-counter {
+  padding: 4px 8px;
+  border: 1px dashed #444;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.fabricator-add-tag:hover,
+.fabricator-add-counter:hover {
+  color: #ccc;
+  border-color: #888;
+}
+
+/* Counters */
+
+.fabricator-counter-list {
+  margin-bottom: 6px;
+}
+
+.fabricator-counter-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  margin-bottom: 2px;
+  font-size: 11px;
+  color: #ccc;
+}
+
+.fabricator-counter-name {
+  flex: 1;
+  font-weight: 700;
+}
+
+.fabricator-counter-range {
+  color: #888;
+  font-family: monospace;
+}
+
+.fabricator-delete-counter {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 10px;
+}
+
+.fabricator-delete-counter:hover {
+  color: #e74c3c;
+}
+
+/* Template Controls */
+
+.fabricator-template-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fabricator-template-controls button {
+  padding: 6px 8px;
+  border: 1px solid #444;
+  background: #222;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fabricator-template-controls button:hover {
+  background: #333;
+  color: #fff;
+  border-color: #888;
+}
+
+/* Template Manager Dialog */
+
+.fabricator-template-manager {
+  padding: 4px 0;
+}
+
+.fabricator-template-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-bottom: 2px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.fabricator-template-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 12px;
+  color: #eee;
+}
+
+.fabricator-template-date {
+  font-size: 10px;
+  color: #666;
+}
+
+.fabricator-delete-template {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #444;
+  background: #222;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fabricator-delete-template:hover {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+/* Builder Dialog */
+
+.fabricator-builder-form {
+  padding: 4px 0;
+}
+
+.fabricator-builder-form .form-group {
+  margin-bottom: 8px;
+}
+
+.fabricator-builder-form label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.fabricator-builder-form input,
+.fabricator-builder-form select {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 13px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #eee;
+}
+
+.fabricator-copies-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fabricator-copies-row input {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.fabricator-copies-row .hint {
+  font-size: 10px;
+  color: #666;
+  font-style: italic;
+}

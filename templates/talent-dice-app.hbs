@@ -1,0 +1,121 @@
+<div class="fabricator-talent-dice">
+  <div class="fabricator-header">
+    <h2><i class="fas fa-dice-d6"></i> {{actor.name}} — Talent Dice</h2>
+    <div class="fabricator-header-controls">
+      <button class="fabricator-create-macros" title="Create hotbar macros"><i class="fas fa-plus-square"></i> Macros</button>
+      <button class="fabricator-refresh" title="Refresh trackers"><i class="fas fa-sync"></i></button>
+      <button class="fabricator-reset-all" title="Reset all (rest/Full Repair)"><i class="fas fa-undo"></i> Reset All</button>
+    </div>
+  </div>
+
+  {{#if hasTrackers}}
+    {{#each trackers}}
+    <div class="fabricator-tracker fabricator-pattern-{{def.pattern}}" data-talent-id="{{talentId}}">
+      <div class="fabricator-tracker-header">
+        <span class="fabricator-die-name">{{def.dieName}}</span>
+        <span class="fabricator-talent-name">{{def.talentName}}</span>
+        <span class="fabricator-source">{{def.source}}</span>
+        {{#if isLocked}}<span class="fabricator-lock-badge"><i class="fas fa-lock"></i> Locked</span>{{/if}}
+      </div>
+
+      <div class="fabricator-tracker-body">
+        <div class="fabricator-die-display">
+          {{{pipsHtml}}}
+        </div>
+
+        <div class="fabricator-controls">
+          {{!-- Countdown controls --}}
+          {{#if isCountdown}}
+            <button class="fabricator-decrement" data-talent-id="{{talentId}}" {{#unless canDecrement}}disabled{{/unless}}>
+              <i class="fas fa-minus"></i> {{def.decrementOn}}
+            </button>
+            {{#if canTrigger}}
+            <button class="fabricator-trigger fabricator-trigger-ready" data-talent-id="{{talentId}}">
+              <i class="fas fa-bolt"></i> TRIGGER
+            </button>
+            {{/if}}
+            {{!-- Iconoclast lock toggle --}}
+            {{#if (eq def.special "transcendent_lock")}}
+            <button class="fabricator-toggle-lock" data-talent-id="{{talentId}}">
+              <i class="fas {{#if isLocked}}fa-unlock{{else}}fa-lock{{/if}}"></i>
+              {{#if isLocked}}End Transcendence{{else}}Enter Transcendence{{/if}}
+            </button>
+            {{/if}}
+          {{/if}}
+
+          {{!-- Countup controls --}}
+          {{#if isCountup}}
+            <button class="fabricator-increment" data-talent-id="{{talentId}}" {{#unless canIncrement}}disabled{{/unless}}>
+              <i class="fas fa-plus"></i>
+              {{#if def.incrementAmount}}+{{def.incrementAmount}}{{else}}+1{{/if}}
+              ({{def.incrementOn}})
+            </button>
+          {{/if}}
+
+          {{!-- Pool distribution (Leader) --}}
+          {{#if isPool}}
+            {{#if def.distributable}}
+            <button class="fabricator-distribute" data-talent-id="{{talentId}}" {{#unless (gt state.value 0)}}disabled{{/unless}}>
+              <i class="fas fa-hand-holding"></i> Issue Die
+            </button>
+              {{#each distributed}}
+              <div class="fabricator-distributed-entry">
+                <span>{{name}}: {{count}}</span>
+                <button class="fabricator-return" data-target-id="{{actorId}}" title="Return die">
+                  <i class="fas fa-undo"></i>
+                </button>
+              </div>
+              {{/each}}
+            {{else}}
+              {{!-- Orator: self-increment --}}
+              <button class="fabricator-increment" data-talent-id="{{talentId}}" {{#unless canIncrement}}disabled{{/unless}}>
+                <i class="fas fa-plus"></i> +1 ({{def.incrementOn}})
+              </button>
+            {{/if}}
+          {{/if}}
+
+          {{!-- Spend options (Countup & Pool) --}}
+          {{#each spendOptions}}
+          <button class="fabricator-spend" data-talent-id="{{../talentId}}" data-option="{{name}}" data-cost="{{cost}}" {{#unless canAfford}}disabled{{/unless}}>
+            <i class="fas fa-arrow-right"></i> {{name}}
+            {{#if (ne cost "all")}}({{cost}}){{else}}(all){{/if}}
+            <span class="fabricator-spend-desc">{{description}}</span>
+          </button>
+          {{/each}}
+        </div>
+
+        <div class="fabricator-tracker-footer">
+          <span class="fabricator-reset-info"><i class="fas fa-info-circle"></i> Resets: {{def.resetOn}}</span>
+          <button class="fabricator-reset-one" data-talent-id="{{talentId}}" title="Reset this die">
+            <i class="fas fa-undo"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  {{else}}
+    <div class="fabricator-no-trackers">
+      <p>No tracked talent dice found on this pilot.</p>
+      <p class="hint">Equip talents with die-tracking mechanics (Brawler, Leader, Gunslinger, etc.) to see them here.</p>
+      <button class="fabricator-refresh"><i class="fas fa-sync"></i> Scan Talents</button>
+    </div>
+  {{/if}}
+
+  {{!-- Received Leadership Dice section --}}
+  {{#if (gt receivedDice 0)}}
+  <div class="fabricator-received-section">
+    <div class="fabricator-tracker-header">
+      <span class="fabricator-die-name">Received Leadership Dice</span>
+      <span class="fabricator-die-label">{{receivedDice}} available</span>
+    </div>
+    <div class="fabricator-controls">
+      {{#each leaderSpendOptions}}
+      <button class="fabricator-spend-received" data-option="{{name}}">
+        <i class="fas fa-arrow-right"></i> {{name}}
+        <span class="fabricator-spend-desc">{{description}}</span>
+      </button>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+</div>

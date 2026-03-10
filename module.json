@@ -1,0 +1,40 @@
+{
+  "id": "lancer-fabricator",
+  "title": "LANCER Fabricator",
+  "description": "Toolkit module for LANCER: talent dice tracking & automation, deployable customization, and NPC/player content transmutation.",
+  "version": "0.2.0",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "12"
+  },
+  "authors": [
+    {
+      "name": "AshOfCreativity"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "lancer",
+        "type": "system",
+        "compatibility": {
+          "minimum": "2.0.0"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/fabricator.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": true
+}

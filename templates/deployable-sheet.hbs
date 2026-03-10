@@ -1,0 +1,238 @@
+<form class="fabricator-deployable-sheet" autocomplete="off">
+  {{!-- Header --}}
+  <header class="sheet-header fabricator-deploy-header">
+    <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="64" width="64" />
+    <div class="header-fields">
+      <h1><input name="name" type="text" value="{{actor.name}}" placeholder="Deployable Name" /></h1>
+      <div class="fabricator-deploy-meta">
+        {{#if deployerName}}<span class="fabricator-deployer"><i class="fas fa-user"></i> {{deployerName}}</span>{{/if}}
+        {{#if syncProtected}}
+        <div class="fabricator-sync-badge">
+          <i class="fas fa-shield-alt"></i> Overrides Active
+          <button class="fabricator-clear-overrides" type="button" title="Reset to synced data">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    <div class="fabricator-header-actions">
+      <button type="button" class="fabricator-save-template" title="Save as template"><i class="fas fa-save"></i></button>
+      <button type="button" class="fabricator-apply-template" title="Apply template"><i class="fas fa-file-import"></i></button>
+      <button type="button" class="fabricator-new-deployable" title="Create new deployable"><i class="fas fa-plus"></i></button>
+    </div>
+  </header>
+
+  {{!-- Tabs --}}
+  <nav class="sheet-tabs tabs" data-group="primary">
+    <a class="item" data-tab="stats"><i class="fas fa-chart-bar"></i> Stats</a>
+    <a class="item" data-tab="actions"><i class="fas fa-fist-raised"></i> Actions</a>
+    <a class="item" data-tab="detail"><i class="fas fa-file-alt"></i> Detail</a>
+    <a class="item" data-tab="config"><i class="fas fa-cog"></i> Config</a>
+  </nav>
+
+  {{!-- Tab Content --}}
+  <section class="sheet-body">
+
+    {{!-- ===== Stats Tab ===== --}}
+    <div class="tab" data-tab="stats" data-group="primary">
+      <div class="fabricator-stat-grid">
+        <div class="fabricator-stat-card">
+          <label>HP Formula</label>
+          <input class="fabricator-stat-input fabricator-hp-input" type="text" name="system.stats.hp" value="{{stats.hp}}" placeholder='e.g. "5" or "10 + @grit"' />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>HP Bonus</label>
+          <input class="fabricator-stat-input" type="number" name="system.hp_bonus" value="{{hp_bonus}}" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Armor</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.armor" value="{{stats.armor}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Evasion</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.evasion" value="{{stats.evasion}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>E-Defense</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.edef" value="{{stats.edef}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Save</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.save" value="{{stats.save}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Speed</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.speed" value="{{stats.speed}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Size</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.size" value="{{stats.size}}" min="0.5" step="0.5" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Heat Cap</label>
+          <input class="fabricator-stat-input" type="number" name="system.stats.heatcap" value="{{stats.heatcap}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Deploy Cost</label>
+          <input class="fabricator-stat-input" type="number" name="system.cost" value="{{cost}}" min="0" />
+        </div>
+        <div class="fabricator-stat-card">
+          <label>Instances</label>
+          <input class="fabricator-stat-input" type="number" name="system.instances" value="{{instances}}" min="1" />
+        </div>
+      </div>
+
+      {{!-- Sync override indicator --}}
+      {{#if syncProtected}}
+      <div class="fabricator-override-list">
+        <span class="fabricator-override-label"><i class="fas fa-shield-alt"></i> Protected fields:</span>
+        {{#each overriddenPaths}}
+        <span class="fabricator-override-path">{{this}}</span>
+        {{/each}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{!-- ===== Actions Tab ===== --}}
+    <div class="tab" data-tab="actions" data-group="primary">
+      {{#each actions}}
+      <div class="fabricator-action-card" data-index="{{index}}">
+        <div class="fabricator-action-header">
+          <input class="fabricator-action-field fabricator-action-name" type="text"
+                 data-index="{{index}}" data-field="name"
+                 value="{{name}}" placeholder="Action Name" />
+          <select class="fabricator-action-field fabricator-action-type"
+                  data-index="{{index}}" data-field="activation">
+            {{#each activationOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          <button type="button" class="fabricator-delete-action" data-index="{{index}}" title="Delete action">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        {{#if trigger}}
+        <div class="fabricator-action-trigger">
+          <label>Trigger:</label>
+          <input class="fabricator-action-field" type="text"
+                 data-index="{{index}}" data-field="trigger"
+                 value="{{trigger}}" placeholder="Trigger condition" />
+        </div>
+        {{/if}}
+        <div class="fabricator-action-detail">
+          <textarea class="fabricator-action-field" data-index="{{index}}" data-field="detail"
+                    placeholder="Effect description (HTML supported)">{{detail}}</textarea>
+        </div>
+      </div>
+      {{/each}}
+
+      <button type="button" class="fabricator-add-action">
+        <i class="fas fa-plus"></i> Add Action
+      </button>
+    </div>
+
+    {{!-- ===== Detail Tab ===== --}}
+    <div class="tab" data-tab="detail" data-group="primary">
+      <div class="fabricator-detail-editor">
+        {{editor detail target="system.detail" button=true editable=true}}
+      </div>
+    </div>
+
+    {{!-- ===== Config Tab ===== --}}
+    <div class="tab" data-tab="config" data-group="primary">
+      {{!-- Activation Types --}}
+      <fieldset class="fabricator-fieldset">
+        <legend>Activation Types</legend>
+        <div class="fabricator-activation-grid">
+          <div class="form-group">
+            <label>Deploy</label>
+            <select name="system.activation">
+              {{#each activation}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Recall</label>
+            <select name="system.recall">
+              {{#each recall}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Redeploy</label>
+            <select name="system.redeploy">
+              {{#each redeploy}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Deactivation</label>
+            <select name="system.deactivation">
+              {{#each deactivation}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      {{!-- Tags --}}
+      <fieldset class="fabricator-fieldset">
+        <legend>Tags</legend>
+        <div class="fabricator-tag-list">
+          {{#each tags}}
+          <div class="fabricator-tag-entry" data-index="{{@index}}">
+            <span class="fabricator-tag-name">{{name}}{{#if val}} {{val}}{{/if}}</span>
+            <button type="button" class="fabricator-delete-tag" data-index="{{@index}}" title="Remove tag">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          {{/each}}
+        </div>
+        <button type="button" class="fabricator-add-tag">
+          <i class="fas fa-plus"></i> Add Tag
+        </button>
+      </fieldset>
+
+      {{!-- Counters --}}
+      <fieldset class="fabricator-fieldset">
+        <legend>Counters</legend>
+        <div class="fabricator-counter-list">
+          {{#each counters}}
+          <div class="fabricator-counter-entry" data-index="{{@index}}">
+            <span class="fabricator-counter-name">{{name}}</span>
+            <span class="fabricator-counter-range">{{val}} / {{max}}</span>
+            <button type="button" class="fabricator-delete-counter" data-index="{{@index}}" title="Remove counter">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          {{/each}}
+        </div>
+        <button type="button" class="fabricator-add-counter">
+          <i class="fas fa-plus"></i> Add Counter
+        </button>
+      </fieldset>
+
+      {{!-- Template Management --}}
+      <fieldset class="fabricator-fieldset">
+        <legend>Templates</legend>
+        <div class="fabricator-template-controls">
+          <button type="button" class="fabricator-save-template">
+            <i class="fas fa-save"></i> Save Current as Template
+          </button>
+          <button type="button" class="fabricator-apply-template">
+            <i class="fas fa-file-import"></i> Apply Template
+          </button>
+          <button type="button" class="fabricator-manage-templates">
+            <i class="fas fa-folder-open"></i> Manage Templates
+          </button>
+        </div>
+      </fieldset>
+    </div>
+
+  </section>
+</form>
