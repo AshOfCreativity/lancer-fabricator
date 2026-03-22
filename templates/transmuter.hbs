@@ -1,0 +1,348 @@
+<div class="fabricator-transmuter-content">
+
+{{#if hasSource}}
+<div class="fabricator-transmuter-workspace" data-target-type="{{targetType}}">
+
+  {{!-- ===== Source Reference Panel ===== --}}
+  <div class="transmuter-panel transmuter-source-panel">
+    <h3 class="transmuter-panel-header"><i class="fas fa-file-import"></i> SOURCE REFERENCE</h3>
+
+    <div class="transmuter-source-meta">
+      {{#if source.img}}<img src="{{source.img}}" width="36" height="36" />{{/if}}
+      <div>
+        <div class="transmuter-source-name">{{source.name}}</div>
+        <div class="transmuter-source-type">{{source.typeName}}</div>
+      </div>
+    </div>
+
+    {{#each source.extraInfo}}
+    <div class="transmuter-source-info"><i class="fas fa-angle-right"></i> {{this}}</div>
+    {{/each}}
+
+    {{#if source.effect}}
+    <div class="transmuter-source-section">
+      <label>Effect</label>
+      <div class="transmuter-source-text">{{{source.effect}}}</div>
+    </div>
+    {{/if}}
+
+    {{#if source.on_hit}}
+    <div class="transmuter-source-section">
+      <label>On Hit</label>
+      <div class="transmuter-source-text">{{{source.on_hit}}}</div>
+    </div>
+    {{/if}}
+
+    {{#if source.tags.length}}
+    <div class="transmuter-source-section">
+      <label>Tags</label>
+      <div class="transmuter-source-tags">
+        {{#each source.tags}}
+        <span class="transmuter-ref-tag">{{name}}{{#if val}} {{val}}{{/if}}</span>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if source.actions.length}}
+    <div class="transmuter-source-section">
+      <label>Actions</label>
+      {{#each source.actions}}
+      <div class="transmuter-source-action">
+        <strong>{{name}}</strong>{{#if activation}} ({{activation}}){{/if}}
+        {{#if detail}}<div class="transmuter-source-text">{{{detail}}}</div>{{/if}}
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    {{#if queueLength}}
+    <div class="transmuter-queue-indicator">
+      <i class="fas fa-layer-group"></i> {{queueLength}} queued
+      <button type="button" class="transmuter-clear-queue" title="Clear queue"><i class="fas fa-times"></i></button>
+    </div>
+    {{/if}}
+
+    <button type="button" class="transmuter-reset transmuter-btn-secondary">
+      <i class="fas fa-undo"></i> Clear &amp; Start Over
+    </button>
+    <button type="button" class="transmuter-view-log transmuter-btn-secondary">
+      <i class="fas fa-clipboard-list"></i> Transmutation Log
+    </button>
+  </div>
+
+  {{!-- ===== Target Editor Panel ===== --}}
+  <div class="transmuter-panel transmuter-target-panel">
+    <h3 class="transmuter-panel-header"><i class="fas fa-hammer"></i> TARGET ITEM</h3>
+
+    <div class="form-group">
+      <label>Item Type</label>
+      <select class="transmuter-target-type">
+        {{#each targetTypes}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" name="target-name" value="{{source.name}}" />
+    </div>
+
+    {{!-- ===== MECH WEAPON ===== --}}
+    <div class="target-section target-mech-weapon">
+      <div class="transmuter-row">
+        <div class="form-group">
+          <label>Mount</label>
+          <select name="weapon-mount">
+            {{#each mountSizes}}<option value="{{this}}">{{this}}</option>{{/each}}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>SP</label>
+          <input type="number" name="weapon-sp" value="0" min="0" />
+        </div>
+      </div>
+
+      <div class="transmuter-profile-list">
+        <div class="transmuter-profile-card">
+          <div class="transmuter-profile-header">
+            <input type="text" name="profile-name" placeholder="Profile name (optional)" />
+            <select name="profile-type">
+              {{#each weaponTypes}}<option value="{{this}}">{{this}}</option>{{/each}}
+            </select>
+            <button type="button" data-delete=".transmuter-profile-card" title="Remove profile">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <fieldset class="transmuter-fieldset">
+            <legend>Damage</legend>
+            <div class="transmuter-damage-list"></div>
+            <button type="button" data-add="damage" class="transmuter-add-btn">
+              <i class="fas fa-plus"></i> Add Damage
+            </button>
+          </fieldset>
+          <fieldset class="transmuter-fieldset">
+            <legend>Range</legend>
+            <div class="transmuter-range-list"></div>
+            <button type="button" data-add="range" class="transmuter-add-btn">
+              <i class="fas fa-plus"></i> Add Range
+            </button>
+          </fieldset>
+          <div class="form-group">
+            <label>Effect</label>
+            <textarea name="profile-effect" rows="3" placeholder="Effect text">{{source.plainEffect}}</textarea>
+          </div>
+          <div class="form-group">
+            <label>On Hit</label>
+            <textarea name="profile-on-hit" rows="2" placeholder="On hit effect"></textarea>
+          </div>
+          <div class="form-group">
+            <label>On Crit</label>
+            <textarea name="profile-on-crit" rows="2" placeholder="On crit effect"></textarea>
+          </div>
+          <fieldset class="transmuter-fieldset transmuter-tag-section">
+            <legend>Tags</legend>
+            <div class="transmuter-tag-list"></div>
+            <button type="button" data-add="tag" class="transmuter-add-btn">
+              <i class="fas fa-plus"></i> Add Tag
+            </button>
+          </fieldset>
+        </div>
+      </div>
+
+      <button type="button" data-add="profile" class="transmuter-add-btn transmuter-add-profile-btn">
+        <i class="fas fa-plus"></i> Add Profile
+      </button>
+    </div>
+
+    {{!-- ===== MECH SYSTEM ===== --}}
+    <div class="target-section target-mech-system">
+      <div class="form-group">
+        <label>SP</label>
+        <input type="number" name="system-sp" value="0" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Effect</label>
+        <textarea name="system-effect" rows="6" placeholder="System effect text">{{source.plainEffect}}</textarea>
+      </div>
+      <fieldset class="transmuter-fieldset">
+        <legend>Actions</legend>
+        <div class="transmuter-action-list"></div>
+        <button type="button" data-add="action" class="transmuter-add-btn">
+          <i class="fas fa-plus"></i> Add Action
+        </button>
+      </fieldset>
+      <fieldset class="transmuter-fieldset transmuter-tag-section">
+        <legend>Tags</legend>
+        <div class="transmuter-tag-list"></div>
+        <button type="button" data-add="tag" class="transmuter-add-btn">
+          <i class="fas fa-plus"></i> Add Tag
+        </button>
+      </fieldset>
+    </div>
+
+    {{!-- ===== NPC FEATURE ===== --}}
+    <div class="target-section target-npc-feature">
+      <div class="form-group">
+        <label>Feature Type</label>
+        <select name="feature-type">
+          {{#each npcFeatureTypes}}<option value="{{this}}">{{this}}</option>{{/each}}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Effect</label>
+        <textarea name="feature-effect" rows="6" placeholder="Feature effect text. Use [[X/Y/Z]] for tier-scaled values.">{{source.plainEffect}}</textarea>
+      </div>
+      <div class="form-group">
+        <label>On Hit</label>
+        <textarea name="feature-on-hit" rows="2" placeholder="On hit effect"></textarea>
+      </div>
+      <fieldset class="transmuter-fieldset">
+        <legend>Actions</legend>
+        <div class="transmuter-action-list"></div>
+        <button type="button" data-add="action" class="transmuter-add-btn">
+          <i class="fas fa-plus"></i> Add Action
+        </button>
+      </fieldset>
+      <fieldset class="transmuter-fieldset transmuter-tag-section">
+        <legend>Tags</legend>
+        <div class="transmuter-tag-list"></div>
+        <button type="button" data-add="tag" class="transmuter-add-btn">
+          <i class="fas fa-plus"></i> Add Tag
+        </button>
+      </fieldset>
+    </div>
+
+    {{!-- Create --}}
+    <div class="transmuter-create-row">
+      <button type="button" class="transmuter-create transmuter-btn-primary">
+        <i class="fas fa-hammer"></i> Create Item
+      </button>
+      {{#if queueLength}}
+      <button type="button" class="transmuter-skip transmuter-btn-skip">
+        <i class="fas fa-forward"></i> Skip
+      </button>
+      {{/if}}
+      <span class="transmuter-create-hint">Item will be created in the world Items tab</span>
+    </div>
+  </div>
+
+</div>
+
+{{else}}
+
+{{!-- ===== Drop Zone / Empty State ===== --}}
+<div class="fabricator-transmuter-dropzone">
+  <i class="fas fa-exchange-alt fa-3x"></i>
+  <p class="transmuter-dropzone-title">Drop an item to begin transmutation</p>
+  <p class="transmuter-dropzone-hint">NPC Feature &rarr; Mech Weapon / System</p>
+  <p class="transmuter-dropzone-hint">Mech Weapon / System &rarr; NPC Feature</p>
+  <p class="transmuter-dropzone-sub">Drag from an actor sheet, compendium, or Items sidebar</p>
+  <button type="button" class="transmuter-view-log transmuter-btn-secondary transmuter-dropzone-log">
+    <i class="fas fa-clipboard-list"></i> Transmutation Log
+  </button>
+</div>
+
+{{/if}}
+
+{{!-- ===== Clonable Templates ===== --}}
+
+<template id="transmuter-template-profile">
+  <div class="transmuter-profile-card">
+    <div class="transmuter-profile-header">
+      <input type="text" name="profile-name" placeholder="Profile name (optional)" />
+      <select name="profile-type">
+        {{#each weaponTypes}}<option value="{{this}}">{{this}}</option>{{/each}}
+      </select>
+      <button type="button" data-delete=".transmuter-profile-card" title="Remove profile">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <fieldset class="transmuter-fieldset">
+      <legend>Damage</legend>
+      <div class="transmuter-damage-list"></div>
+      <button type="button" data-add="damage" class="transmuter-add-btn">
+        <i class="fas fa-plus"></i> Add Damage
+      </button>
+    </fieldset>
+    <fieldset class="transmuter-fieldset">
+      <legend>Range</legend>
+      <div class="transmuter-range-list"></div>
+      <button type="button" data-add="range" class="transmuter-add-btn">
+        <i class="fas fa-plus"></i> Add Range
+      </button>
+    </fieldset>
+    <div class="form-group">
+      <label>Effect</label>
+      <textarea name="profile-effect" rows="3" placeholder="Effect text"></textarea>
+    </div>
+    <div class="form-group">
+      <label>On Hit</label>
+      <textarea name="profile-on-hit" rows="2" placeholder="On hit effect"></textarea>
+    </div>
+    <div class="form-group">
+      <label>On Crit</label>
+      <textarea name="profile-on-crit" rows="2" placeholder="On crit effect"></textarea>
+    </div>
+    <fieldset class="transmuter-fieldset transmuter-tag-section">
+      <legend>Tags</legend>
+      <div class="transmuter-tag-list"></div>
+      <button type="button" data-add="tag" class="transmuter-add-btn">
+        <i class="fas fa-plus"></i> Add Tag
+      </button>
+    </fieldset>
+  </div>
+</template>
+
+<template id="transmuter-template-damage">
+  <div class="transmuter-damage-entry transmuter-inline-entry">
+    <input type="text" name="damage-val" placeholder="1d6" />
+    <select name="damage-type">
+      {{#each damageTypes}}<option value="{{this}}">{{this}}</option>{{/each}}
+    </select>
+    <button type="button" data-delete=".transmuter-damage-entry" title="Remove">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</template>
+
+<template id="transmuter-template-range">
+  <div class="transmuter-range-entry transmuter-inline-entry">
+    <input type="number" name="range-val" placeholder="0" min="0" />
+    <select name="range-type">
+      {{#each rangeTypes}}<option value="{{this}}">{{this}}</option>{{/each}}
+    </select>
+    <button type="button" data-delete=".transmuter-range-entry" title="Remove">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</template>
+
+<template id="transmuter-template-action">
+  <div class="transmuter-action-entry">
+    <div class="transmuter-action-header">
+      <input type="text" name="action-name" placeholder="Action name" />
+      <select name="action-activation">
+        {{#each activationTypes}}<option value="{{this}}">{{#if this}}{{this}}{{else}}(None){{/if}}</option>{{/each}}
+      </select>
+      <button type="button" data-delete=".transmuter-action-entry" title="Remove">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <input type="text" name="action-trigger" placeholder="Trigger condition (optional)" />
+    <textarea name="action-detail" rows="2" placeholder="Action effect"></textarea>
+  </div>
+</template>
+
+<template id="transmuter-template-tag">
+  <div class="transmuter-tag-entry transmuter-inline-entry">
+    <input type="text" name="tag-name" placeholder="Tag ID (e.g. tg_ap)" />
+    <input type="text" name="tag-val" placeholder="Value" />
+    <button type="button" data-delete=".transmuter-tag-entry" title="Remove">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</template>
+
+</div>

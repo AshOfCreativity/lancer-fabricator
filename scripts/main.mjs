@@ -1,7 +1,7 @@
 /**
  * LANCER Fabricator - Main Entry Point
  *
- * v0.2.0 — Talent Dice Tracker + Deployable Workshop
+ * v0.3.0 — Talent Dice Tracker + Deployable Workshop + NPC/Player Transmuter
  */
 
 import { TALENT_DICE, PATTERN, getTalentDie, getAllTrackedTalentIds } from "./talent-dice-data.mjs";
@@ -31,6 +31,9 @@ import { registerSyncProtectionHook, getOverrides, hasOverrides, saveOverride, c
 import { registerTemplateSettings, saveTemplate, applyTemplate, getTemplates, deleteTemplate, showTemplatePicker } from "./deployable-templates.mjs";
 import { showDeployableBuilder, getPresets } from "./deployable-builder.mjs";
 import { syncTalentWeapons, cleanupTalentWeapons } from "./talent-weapons.mjs";
+
+// Transmuter
+import { TransmuterApp, showTransmuter, registerTransmuterSettings, getTransmuterLog, clearTransmuterLog, showTransmuterLog } from "./transmuter-app.mjs";
 
 const MODULE_ID = "lancer-fabricator";
 
@@ -96,6 +99,7 @@ Hooks.once("init", () => {
   registerDeployableSheet();
   registerTemplateSettings();
   registerSyncProtectionHook();
+  registerTransmuterSettings();
 
   // Expose public API
   game.modules.get(MODULE_ID).api = {
@@ -146,7 +150,14 @@ Hooks.once("init", () => {
     getOverrides,
     hasOverrides,
     saveOverride,
-    clearOverrides
+    clearOverrides,
+
+    // Transmuter
+    TransmuterApp,
+    showTransmuter,
+    getTransmuterLog,
+    clearTransmuterLog,
+    showTransmuterLog
   };
 });
 
@@ -195,6 +206,13 @@ Hooks.on("getSceneControlButtons", (controls) => {
       icon: "fas fa-dice-d6",
       button: true,
       onClick: () => openTalentDiceForSelected()
+    });
+    tokenControl.tools.push({
+      name: "transmuter",
+      title: "NPC \u2194 Player Transmuter",
+      icon: "fas fa-exchange-alt",
+      button: true,
+      onClick: () => showTransmuter()
     });
   }
 });

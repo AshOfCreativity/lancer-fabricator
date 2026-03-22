@@ -84,6 +84,37 @@
       "PresetDeployable": "Deployable",
       "PresetCustom": "Custom (blank)",
       "SavedTemplates": "Saved Templates"
+    },
+    "Transmuter": {
+      "Title": "NPC \u2194 Player Transmuter",
+      "DropHint": "Drop an NPC feature or player item here to begin",
+      "SourceReference": "Source Reference",
+      "TargetItem": "Target Item",
+      "ItemType": "Item Type",
+      "MechWeapon": "Mech Weapon",
+      "MechSystem": "Mech System",
+      "NpcFeature": "NPC Feature",
+      "Mount": "Mount",
+      "SP": "SP",
+      "ProfileName": "Profile name",
+      "WeaponType": "Weapon Type",
+      "FeatureType": "Feature Type",
+      "Damage": "Damage",
+      "Range": "Range",
+      "Effect": "Effect",
+      "OnHit": "On Hit",
+      "OnCrit": "On Crit",
+      "Tags": "Tags",
+      "Actions": "Actions",
+      "AddDamage": "Add Damage",
+      "AddRange": "Add Range",
+      "AddProfile": "Add Profile",
+      "AddAction": "Add Action",
+      "AddTag": "Add Tag",
+      "CreateItem": "Create Item",
+      "CreateHint": "Item will be created in the world Items tab",
+      "ClearStartOver": "Clear & Start Over",
+      "Transmuted": "Transmuted"
     }
   }
 }
