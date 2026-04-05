@@ -3,6 +3,10 @@
  *
  * Manages runtime state for talent dice — current values, persistence via actor flags,
  * and mutation methods (decrement, increment, spend, reset, distribute).
+ *
+ * All operations are mech-centric. Talents are detected by reading the mech's
+ * Active Effects (which the Lancer system propagates from the linked pilot).
+ * Die state is stored on the mech actor's flags, not the pilot.
  */
 
 import { TALENT_DICE, PATTERN, getTalentDie, getAllTrackedTalentIds } from "./talent-dice-data.mjs";
@@ -11,8 +15,8 @@ const MODULE_ID = "lancer-fabricator-main";
 const FLAG_KEY = "talentDice";
 
 /**
- * Get the stored die state for an actor
- * @param {Actor} actor
+ * Get the stored die state for a mech actor
+ * @param {Actor} actor - A mech actor
  * @returns {Object} Map of talentId -> { value, distributed?, locked? }
  */
 export function getDieStates(actor) {
@@ -44,41 +48,89 @@ async function setDieState(actor, talentId, state) {
 }
 
 /**
- * Initialize die trackers for an actor based on their equipped talents.
- * Reads the actor's talent items and creates state entries for any that
- * match our tracked talent registry.
+ * Detect which tracked talents are active on a mech by reading its Active Effects.
+ * The Lancer system propagates pilot talent bonuses as inherited effects on the mech.
+ * Effect names match the talent's display name (e.g., "Stormbringer", "Brawler").
  *
- * @param {Actor} actor - A LANCER pilot actor
+ * Also checks the pilot's items via the mech's pilot reference as a fallback.
+ *
+ * @param {Actor} mech - A LANCER mech actor
+ * @returns {string[]} List of matched talent IDs from the TALENT_DICE registry
+ */
+function detectMechTalents(mech) {
+  if (mech.type !== "mech") return [];
+
+  const matched = new Set();
+  const trackedTalents = Object.values(TALENT_DICE);
+
+  // Primary: check mech's active effects for talent names
+  const effects = mech.effects ?? [];
+  for (const effect of effects) {
+    const effectName = (effect.name || effect.label || "").toLowerCase();
+    for (const def of trackedTalents) {
+      if (effectName.includes(def.talentName.toLowerCase())) {
+        matched.add(def.talentId);
+      }
+    }
+  }
+
+  // Fallback: read pilot's talent items via the resolved pilot reference
+  const pilot = mech.system?.pilot?.value;
+  if (pilot) {
+    for (const item of pilot.items) {
+      if (item.type !== "talent") continue;
+      const lid = item.system?.lid;
+      if (lid && TALENT_DICE[lid]) {
+        matched.add(lid);
+      }
+    }
+  }
+
+  return [...matched];
+}
+
+/**
+ * Get the talent rank from the pilot linked to this mech
+ */
+function getMechTalentRank(mech, talentId) {
+  const pilot = mech.system?.pilot?.value;
+  if (!pilot) return 1;
+  for (const item of pilot.items) {
+    if (item.type === "talent" && item.system?.lid === talentId) {
+      return item.system?.curr_rank || 1;
+    }
+  }
+  return 1;
+}
+
+/**
+ * Initialize die trackers on a mech based on detected talents.
+ * Reads the mech's active effects and pilot reference to find tracked talents,
+ * then creates state entries on the mech's flags.
+ *
+ * @param {Actor} mech - A LANCER mech actor
  * @returns {string[]} List of talent IDs that were initialized
  */
-export async function initializeTrackers(actor) {
-  if (actor.type !== "pilot") return [];
+export async function initializeTrackers(mech) {
+  if (mech.type !== "mech") return [];
 
-  const trackedIds = getAllTrackedTalentIds();
-  const currentStates = getDieStates(actor);
+  const detectedTalents = detectMechTalents(mech);
+  const currentStates = getDieStates(mech);
   const initialized = [];
 
-  // Find talents on the actor that match our registry
-  const actorTalents = getActorTalentIds(actor);
-
-  for (const talentId of actorTalents) {
-    if (!trackedIds.includes(talentId)) continue;
-
-    // Only initialize if no state exists yet
+  for (const talentId of detectedTalents) {
     if (!currentStates[talentId]) {
       const def = getTalentDie(talentId);
-      const state = createInitialState(def, actor);
-      await setDieState(actor, talentId, state);
+      const state = createInitialState(def, mech);
+      await setDieState(mech, talentId, state);
       initialized.push(talentId);
     }
   }
 
-  // Clean up trackers for talents the actor no longer has.
-  // Uses unsetFlag with dot-notation to delete individual keys
-  // without touching sibling talent states.
+  // Clean up trackers for talents no longer detected
   for (const talentId of Object.keys(currentStates)) {
-    if (!actorTalents.includes(talentId)) {
-      await actor.unsetFlag(MODULE_ID, `${FLAG_KEY}.${talentId}`);
+    if (!detectedTalents.includes(talentId)) {
+      await mech.unsetFlag(MODULE_ID, `${FLAG_KEY}.${talentId}`);
     }
   }
 
@@ -86,37 +138,9 @@ export async function initializeTrackers(actor) {
 }
 
 /**
- * Extract talent IDs from a LANCER pilot actor.
- * LANCER stores talents as items on the actor with system.lid matching the talent ID.
- */
-function getActorTalentIds(actor) {
-  const talents = [];
-  for (const item of actor.items) {
-    if (item.type === "talent") {
-      // LANCER uses system.lid for the canonical talent ID
-      const lid = item.system?.lid;
-      if (lid) talents.push(lid);
-    }
-  }
-  return talents;
-}
-
-/**
- * Get the talent rank an actor has for a given talent
- */
-function getActorTalentRank(actor, talentId) {
-  for (const item of actor.items) {
-    if (item.type === "talent" && item.system?.lid === talentId) {
-      return item.system?.curr_rank || 1;
-    }
-  }
-  return 0;
-}
-
-/**
  * Create initial state for a talent die
  */
-function createInitialState(def, actor) {
+function createInitialState(def, mech) {
   const state = {
     value: def.startValue,
     locked: false
@@ -124,10 +148,10 @@ function createInitialState(def, actor) {
 
   // Pool pattern: set initial pool size based on rank
   if (def.pattern === PATTERN.POOL && def.rankPoolSize) {
-    const rank = getActorTalentRank(actor, def.talentId);
+    const rank = getMechTalentRank(mech, def.talentId);
     state.poolSize = def.rankPoolSize[rank] || def.rankPoolSize[1] || 0;
     state.value = def.talentId === "t_leader" ? state.poolSize : def.startValue;
-    state.distributed = {}; // actorId -> count (for Leader)
+    state.distributed = {};
   }
 
   return state;
@@ -221,7 +245,7 @@ export async function resetDie(actor, talentId) {
   const state = getDieState(actor, talentId) || {};
 
   if (def.pattern === PATTERN.POOL && def.rankPoolSize) {
-    const rank = getActorTalentRank(actor, def.talentId);
+    const rank = actor.type === "mech" ? getMechTalentRank(actor, def.talentId) : 1;
     state.poolSize = def.rankPoolSize[rank] || 0;
     state.value = def.talentId === "t_leader" ? state.poolSize : def.startValue;
     state.distributed = {};
@@ -282,8 +306,8 @@ export async function useTriggerAbility(actor, talentId) {
 
 /**
  * Distribute a Leadership Die to an ally (Pattern C, Leader only)
- * @param {Actor} owner - The Leader actor
- * @param {Actor} target - The ally receiving the die
+ * @param {Actor} owner - The mech actor with Leader talent
+ * @param {string} targetActorId - The ally mech receiving the die
  */
 export async function distributeDie(owner, targetActorId) {
   const def = getTalentDie("t_leader");

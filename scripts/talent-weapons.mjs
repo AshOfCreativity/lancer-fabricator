@@ -113,44 +113,37 @@ function buildUnchargedProfile(weaponDef, dieState, dieDef) {
 }
 
 /**
- * Sync talent trigger weapons on a pilot's mech(s).
+ * Sync talent trigger weapons directly on a mech actor.
  *
  * Creates weapons that don't exist, updates profiles based on die state,
- * and removes weapons for unequipped talents.
+ * and removes weapons for talents no longer active.
  *
- * @param {Actor} pilot - LANCER pilot actor
+ * @param {Actor} mech - LANCER mech actor
  */
-export async function syncTalentWeapons(pilot) {
-  if (pilot?.type !== "pilot") return;
+export async function syncTalentWeapons(mech) {
+  if (mech?.type !== "mech") return;
 
-  const mechs = findMechsForPilot(pilot);
-  if (mechs.length === 0) return;
+  for (const [talentId, weaponDef] of Object.entries(TRIGGER_WEAPONS)) {
+    const dieDef = getTalentDie(talentId);
+    if (!dieDef) continue;
 
-  for (const mech of mechs) {
-    for (const [talentId, weaponDef] of Object.entries(TRIGGER_WEAPONS)) {
-      const dieDef = getTalentDie(talentId);
-      if (!dieDef) continue;
+    const dieState = getDieState(mech, talentId);
+    const existingWeapon = findTalentWeapon(mech, talentId);
 
-      const dieState = getDieState(pilot, talentId);
-      const existingWeapon = findTalentWeapon(mech, talentId);
-
-      if (!dieState) {
-        // Talent not equipped — remove weapon if it exists
-        if (existingWeapon) {
-          await mech.deleteEmbeddedDocuments("Item", [existingWeapon.id]);
-        }
-        continue;
+    if (!dieState) {
+      // Talent not active on this mech — remove weapon if it exists
+      if (existingWeapon) {
+        await mech.deleteEmbeddedDocuments("Item", [existingWeapon.id]);
       }
+      continue;
+    }
 
-      const isCharged = dieState.value === dieDef.minValue && !dieState.locked;
+    const isCharged = dieState.value === dieDef.minValue && !dieState.locked;
 
-      if (!existingWeapon) {
-        // Create the weapon with both profiles
-        await createTalentWeapon(mech, talentId, weaponDef, dieState, dieDef, isCharged);
-      } else {
-        // Update the existing weapon's profiles and selected index
-        await updateTalentWeapon(existingWeapon, weaponDef, dieState, dieDef, isCharged);
-      }
+    if (!existingWeapon) {
+      await createTalentWeapon(mech, talentId, weaponDef, dieState, dieDef, isCharged);
+    } else {
+      await updateTalentWeapon(existingWeapon, weaponDef, dieState, dieDef, isCharged);
     }
   }
 }
@@ -210,22 +203,6 @@ function findTalentWeapon(mech, talentId) {
     i.type === "mech_weapon" &&
     i.getFlag(MODULE_ID, "talentWeapon") === talentId
   );
-}
-
-/**
- * Find all mech actors linked to a pilot.
- * LANCER stores the pilot reference as a SyncUUIDRefField with .id (UUID string).
- */
-function findMechsForPilot(pilot) {
-  const pilotUuid = pilot.uuid;
-  const pilotId = pilot.id;
-  return game.actors.filter(a => {
-    if (a.type !== "mech") return false;
-    const ref = a.system?.pilot;
-    if (!ref) return false;
-    // SyncUUIDRefField: .id is the UUID, .value is the resolved actor
-    return ref.id === pilotUuid || ref.value?.id === pilotId;
-  });
 }
 
 /**

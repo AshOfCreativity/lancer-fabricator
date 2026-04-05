@@ -23,7 +23,7 @@ const MODULE_ID = "lancer-fabricator-main";
  * Returns an array of macro descriptors (not yet created in Foundry).
  */
 export function getAvailableMacros(actor) {
-  if (!actor || actor.type !== "pilot") return [];
+  if (!actor || actor.type !== "mech") return [];
 
   const api = game.modules.get(MODULE_ID)?.api;
   if (!api) return [];
@@ -182,50 +182,47 @@ export async function createActiveMechMacro(slot = null) {
 function buildMacroScript(descriptor) {
   const { talentId, action, optionName, cost } = descriptor;
 
-  // Common preamble: find the pilot from selected token
+  // Common preamble: get the mech from selected token
   const preamble = `
 const fab = game.modules.get("${MODULE_ID}")?.api;
 if (!fab) return ui.notifications.error("LANCER Fabricator not active");
 const token = canvas.tokens.controlled[0];
 if (!token) return ui.notifications.warn("Select a token first");
-const actor = token.actor;
-const pilot = actor?.type === "mech"
-  ? game.actors.get(actor.system?.pilot?.id)
-  : actor?.type === "pilot" ? actor : null;
-if (!pilot) return ui.notifications.warn("No pilot found for selected token");
+const mech = token.actor;
+if (!mech || mech.type !== "mech") return ui.notifications.warn("Select a mech token");
 `.trim();
 
   switch (action) {
     case "decrement":
       return `${preamble}
-const result = await fab.decrementDie(pilot, "${talentId}");
+const result = await fab.decrementDie(mech, "${talentId}");
 if (result?.locked) ui.notifications.warn("Die is locked");
 `;
 
     case "increment":
       return `${preamble}
-await fab.incrementDie(pilot, "${talentId}");
+await fab.incrementDie(mech, "${talentId}");
 `;
 
     case "trigger":
       return `${preamble}
-const state = fab.getDieState(pilot, "${talentId}");
+const state = fab.getDieState(mech, "${talentId}");
 const def = fab.getTalentDie("${talentId}");
 if (!state || state.value !== def.minValue) {
   return ui.notifications.warn(def.dieName + " is not ready to trigger (value: " + (state?.value ?? "?") + ", needs: " + def.minValue + ")");
 }
-await fab.useTriggerAbility(pilot, "${talentId}");
+await fab.useTriggerAbility(mech, "${talentId}");
 `;
 
     case "spend":
       return `${preamble}
-const result = await fab.spendDice(pilot, "${talentId}", ${JSON.stringify(cost)}, ${JSON.stringify(optionName)});
+const result = await fab.spendDice(mech, "${talentId}", ${JSON.stringify(cost)}, ${JSON.stringify(optionName)});
 if (!result) ui.notifications.warn("Not enough dice to spend");
 `;
 
     case "distribute":
       return `${preamble}
-const allies = game.actors.filter(a => a.type === "pilot" && a.id !== pilot.id);
+const allies = game.actors.filter(a => a.type === "mech" && a.id !== mech.id);
 if (allies.length === 0) return ui.notifications.warn("No allies to distribute to");
 const options = allies.map(a => \`<option value="\${a.id}">\${a.name}</option>\`).join("");
 new Dialog({
@@ -236,7 +233,7 @@ new Dialog({
       label: "Issue Order",
       callback: async (html) => {
         const id = html.find('[name="target"]').val();
-        const result = await fab.distributeDie(pilot, id);
+        const result = await fab.distributeDie(mech, id);
         if (!result) ui.notifications.warn("No dice available to distribute");
       }
     },
@@ -247,7 +244,7 @@ new Dialog({
 
     case "reset":
       return `${preamble}
-await fab.resetDie(pilot, "${talentId}");
+await fab.resetDie(mech, "${talentId}");
 const def = fab.getTalentDie("${talentId}");
 ui.notifications.info(def.dieName + " reset");
 `;
@@ -257,13 +254,7 @@ ui.notifications.info(def.dieName + " reset");
 const fab = game.modules.get("${MODULE_ID}")?.api;
 if (!fab) return ui.notifications.error("LANCER Fabricator not active");
 const token = canvas.tokens.controlled[0];
-if (token) {
-  const actor = token.actor;
-  const pilot = actor?.type === "mech"
-    ? game.actors.get(actor.system?.pilot?.id)
-    : actor?.type === "pilot" ? actor : null;
-  if (pilot) return fab.openTalentDiceApp(pilot);
-}
+if (token?.actor?.type === "mech") return fab.openTalentDiceApp(token.actor);
 fab.openTalentDiceForSelected();
 `.trim();
 

@@ -78,17 +78,14 @@ async function fabricatorPreAttackStep(state, options) {
     const actor = state.actor;
     if (!actor) return true;
 
-    // Find the pilot (could be mech actor attacking)
-    const pilot = actor.type === "mech"
-      ? game.actors.get(actor.system?.pilot?.id)
-      : actor.type === "pilot" ? actor : null;
-
-    if (!pilot) return true;
+    // Die state lives on the mech
+    const mech = actor.type === "mech" ? actor : null;
+    if (!mech) return true;
 
     const offers = [];
 
-    // Check for received Leadership Dice (this pilot has dice from a Leader)
-    const receivedDice = pilot.getFlag(MODULE_ID, "receivedLeadershipDice") || 0;
+    // Check for received Leadership Dice
+    const receivedDice = mech.getFlag(MODULE_ID, "receivedLeadershipDice") || 0;
     if (receivedDice > 0) {
       offers.push({
         id: "leadership_accuracy",
@@ -96,8 +93,7 @@ async function fabricatorPreAttackStep(state, options) {
         talentName: "Leader",
         type: "accuracy",
         execute: async () => {
-          await spendReceivedDie(pilot, "+1 Accuracy");
-          // Inject +1 accuracy into the attack state
+          await spendReceivedDie(mech, "+1 Accuracy");
           state.data.acc_diff = state.data.acc_diff || {};
           const currentAcc = state.data.acc_diff.accuracy || 0;
           state.data.acc_diff.accuracy = currentAcc + 1;
@@ -105,8 +101,8 @@ async function fabricatorPreAttackStep(state, options) {
       });
     }
 
-    // Check for Orator dice (self-spend for Investigate: +1 Accuracy equivalent)
-    const oratorState = getDieState(pilot, "mf_orator");
+    // Check for Orator dice
+    const oratorState = getDieState(mech, "mf_orator");
     if (oratorState && oratorState.value >= 2) {
       offers.push({
         id: "orator_investigate",
@@ -114,8 +110,7 @@ async function fabricatorPreAttackStep(state, options) {
         talentName: "Orator",
         type: "reroll",
         execute: async () => {
-          await spendDice(pilot, "mf_orator", 2, "Investigate");
-          // Flag the state so post-attack knows to apply "roll twice" logic
+          await spendDice(mech, "mf_orator", 2, "Investigate");
           state[MODULE_ID] = state[MODULE_ID] || {};
           state[MODULE_ID].oratorInvestigate = true;
         }
@@ -195,16 +190,13 @@ async function fabricatorPostAttackStep(state, options) {
     const actor = state.actor;
     if (!actor) return true;
 
-    const pilot = actor.type === "mech"
-      ? game.actors.get(actor.system?.pilot?.id)
-      : actor.type === "pilot" ? actor : null;
-
-    if (!pilot) return true;
+    const mech = actor.type === "mech" ? actor : null;
+    if (!mech) return true;
 
     const hitResults = state.data?.hit_results || [];
     if (hitResults.length === 0) return true;
 
-    const states = getDieStates(pilot);
+    const states = getDieStates(mech);
     const anyHit = hitResults.some(r => r.hit);
     const anyMiss = hitResults.some(r => !r.hit);
 
@@ -229,7 +221,7 @@ async function fabricatorPostAttackStep(state, options) {
 
     // --- Brutal: spend on hit ---
     if (states.t_brutal && anyHit) {
-      const brutalState = getDieState(pilot, "t_brutal");
+      const brutalState = getDieState(mech, "t_brutal");
       if (brutalState?.value > 0) {
         suggestions.push({
           id: "brutal_spend",
@@ -245,7 +237,7 @@ async function fabricatorPostAttackStep(state, options) {
 
     // --- Gunslinger: decrement on hit with Auxiliary Ranged ---
     if (states.t_gunslinger && anyHit) {
-      const gsState = getDieState(pilot, "t_gunslinger");
+      const gsState = getDieState(mech, "t_gunslinger");
       const looksAuxRanged = weaponSize === "aux" && weaponType !== "Melee";
       suggestions.push({
         id: "gunslinger_hit",
@@ -259,7 +251,7 @@ async function fabricatorPostAttackStep(state, options) {
 
     // --- Duelist: increment on hit with Main Melee ---
     if (states.t_duelist && anyHit) {
-      const dState = getDieState(pilot, "t_duelist");
+      const dState = getDieState(mech, "t_duelist");
       const looksMainMelee = weaponSize === "main" && weaponType === "Melee";
       suggestions.push({
         id: "duelist_hit",
@@ -274,9 +266,9 @@ async function fabricatorPostAttackStep(state, options) {
 
     // --- Stormbringer: decrement on hit with Launcher ---
     if (states.t_stormbringer && anyHit) {
-      const stState = getDieState(pilot, "t_stormbringer");
+      const stState = getDieState(mech, "t_stormbringer");
       const looksLauncher = weaponType === "Launcher";
-      const usedThisRound = pilot.getFlag(MODULE_ID, "stormbringerUsedRound") === game.combat?.round;
+      const usedThisRound = mech.getFlag(MODULE_ID, "stormbringerUsedRound") === game.combat?.round;
       const hint = usedThisRound
         ? "Already used Stormbending this round"
         : (!looksLauncher ? `Detected: ${weaponType || "?"}` : null);
@@ -294,7 +286,7 @@ async function fabricatorPostAttackStep(state, options) {
     const talentWeaponId = state.item?.getFlag?.(MODULE_ID, "talentWeapon");
     if (talentWeaponId && states[talentWeaponId]) {
       const twDef = getTalentDie(talentWeaponId);
-      const twState = getDieState(pilot, talentWeaponId);
+      const twState = getDieState(mech, talentWeaponId);
       if (twDef && twState && twState.value === twDef.minValue) {
         suggestions.push({
           id: "trigger_weapon_" + talentWeaponId,
@@ -308,7 +300,7 @@ async function fabricatorPostAttackStep(state, options) {
 
     // --- Brawler: decrement on basic attack (grapple/ram/improvised) ---
     if (states.t_brawler && !state.item && anyHit) {
-      const brState = getDieState(pilot, "t_brawler");
+      const brState = getDieState(mech, "t_brawler");
       suggestions.push({
         id: "brawler_basic",
         talentId: "t_brawler",
@@ -327,17 +319,17 @@ async function fabricatorPostAttackStep(state, options) {
       if (item.action === "increment") {
         const times = item.amount || 1;
         for (let i = 0; i < times; i++) {
-          await incrementDie(pilot, item.talentId);
+          await incrementDie(mech, item.talentId);
         }
       } else if (item.action === "decrement") {
-        await decrementDie(pilot, item.talentId);
+        await decrementDie(mech, item.talentId);
         if (item.talentId === "t_stormbringer" && game.combat) {
-          await pilot.setFlag(MODULE_ID, "stormbringerUsedRound", game.combat.round);
+          await mech.setFlag(MODULE_ID, "stormbringerUsedRound", game.combat.round);
         }
       } else if (item.action === "spend") {
-        await spendDice(pilot, item.talentId, item.cost, item.optionName);
+        await spendDice(mech, item.talentId, item.cost, item.optionName);
       } else if (item.action === "trigger") {
-        await useTriggerAbility(pilot, item.talentId);
+        await useTriggerAbility(mech, item.talentId);
       }
     }
 
