@@ -121,18 +121,28 @@ function buildUnchargedProfile(weaponDef, dieState, dieDef) {
  * @param {Actor} mech - LANCER mech actor
  */
 export async function syncTalentWeapons(mech) {
-  if (mech?.type !== "mech") return;
+  if (mech?.type !== "mech") {
+    console.warn(`${MODULE_ID} | syncTalentWeapons called with non-mech actor:`, mech?.type, mech?.name);
+    return;
+  }
+
+  console.log(`${MODULE_ID} | syncTalentWeapons: ${mech.name} — checking ${Object.keys(TRIGGER_WEAPONS).length} trigger weapon definitions`);
 
   for (const [talentId, weaponDef] of Object.entries(TRIGGER_WEAPONS)) {
     const dieDef = getTalentDie(talentId);
-    if (!dieDef) continue;
+    if (!dieDef) {
+      console.warn(`${MODULE_ID} | syncTalentWeapons: no die definition for ${talentId}`);
+      continue;
+    }
 
     const dieState = getDieState(mech, talentId);
     const existingWeapon = findTalentWeapon(mech, talentId);
 
+    console.log(`${MODULE_ID} | syncTalentWeapons: ${talentId} — dieState: ${dieState ? JSON.stringify(dieState) : "null"}, existingWeapon: ${existingWeapon ? existingWeapon.name : "none"}`);
+
     if (!dieState) {
-      // Talent not active on this mech — remove weapon if it exists
       if (existingWeapon) {
+        console.log(`${MODULE_ID} | syncTalentWeapons: removing weapon for inactive talent ${talentId}`);
         await mech.deleteEmbeddedDocuments("Item", [existingWeapon.id]);
       }
       continue;
@@ -141,6 +151,7 @@ export async function syncTalentWeapons(mech) {
     const isCharged = dieState.value === dieDef.minValue && !dieState.locked;
 
     if (!existingWeapon) {
+      console.log(`${MODULE_ID} | syncTalentWeapons: creating weapon "${weaponDef.name}" for ${talentId} (charged: ${isCharged})`);
       await createTalentWeapon(mech, talentId, weaponDef, dieState, dieDef, isCharged);
     } else {
       await updateTalentWeapon(existingWeapon, weaponDef, dieState, dieDef, isCharged);
@@ -170,9 +181,11 @@ async function createTalentWeapon(mech, talentId, weaponDef, dieState, dieDef, i
   };
 
   try {
-    await mech.createEmbeddedDocuments("Item", [itemData]);
+    console.log(`${MODULE_ID} | createTalentWeapon: item data:`, JSON.stringify(itemData, null, 2));
+    const created = await mech.createEmbeddedDocuments("Item", [itemData]);
+    console.log(`${MODULE_ID} | createTalentWeapon: SUCCESS — created "${weaponDef.name}" on ${mech.name}`, created);
   } catch (err) {
-    console.error(`${MODULE_ID} | Failed to create talent weapon "${weaponDef.name}" on ${mech.name}`, err);
+    console.error(`${MODULE_ID} | createTalentWeapon: FAILED — "${weaponDef.name}" on ${mech.name}`, err);
   }
 }
 

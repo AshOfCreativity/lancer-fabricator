@@ -41,7 +41,9 @@ export function registerFabricatorFlows(flowSteps, flows) {
     flowSteps.set("fabricatorPostAttack", fabricatorPostAttackStep);
 
     // Insert into WeaponAttackFlow
+    console.log(`${MODULE_ID} | registerFlows: available flows:`, [...flows.keys()]);
     const WeaponAttackFlow = flows.get("WeaponAttackFlow");
+    console.log(`${MODULE_ID} | registerFlows: WeaponAttackFlow:`, WeaponAttackFlow, "methods:", WeaponAttackFlow ? Object.getOwnPropertyNames(WeaponAttackFlow) : "N/A");
     if (WeaponAttackFlow?.insertStepBefore && WeaponAttackFlow?.insertStepAfter) {
       WeaponAttackFlow.insertStepBefore("showAttackHUD", "fabricatorPreAttack");
       WeaponAttackFlow.insertStepAfter("rollAttacks", "fabricatorPostAttack");
@@ -80,7 +82,11 @@ async function fabricatorPreAttackStep(state, options) {
 
     // Die state lives on the mech
     const mech = actor.type === "mech" ? actor : null;
-    if (!mech) return true;
+    if (!mech) {
+      console.log(`${MODULE_ID} | preAttack: actor is not a mech (${actor.type}), skipping`);
+      return true;
+    }
+    console.log(`${MODULE_ID} | preAttack: running for ${mech.name}`);
 
     const offers = [];
 
@@ -191,12 +197,19 @@ async function fabricatorPostAttackStep(state, options) {
     if (!actor) return true;
 
     const mech = actor.type === "mech" ? actor : null;
-    if (!mech) return true;
+    if (!mech) {
+      console.log(`${MODULE_ID} | postAttack: actor is not a mech (${actor.type}), skipping`);
+      return true;
+    }
 
     const hitResults = state.data?.hit_results || [];
-    if (hitResults.length === 0) return true;
+    if (hitResults.length === 0) {
+      console.log(`${MODULE_ID} | postAttack: no hit results, skipping`);
+      return true;
+    }
 
     const states = getDieStates(mech);
+    console.log(`${MODULE_ID} | postAttack: ${mech.name} — hit results: ${hitResults.length}, die states:`, Object.keys(states));
     const anyHit = hitResults.some(r => r.hit);
     const anyMiss = hitResults.some(r => !r.hit);
 
