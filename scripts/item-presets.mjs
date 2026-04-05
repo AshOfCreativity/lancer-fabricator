@@ -171,32 +171,55 @@ export const VEHICLE_PRESETS = [
     name: "Kavalieros Coil Bike",
     category: "Vehicle",
     description: "Aunic all-terrain reconnaissance bike. Fast, light, and nimble. Captured from Kavalieros scouts.",
-    actorData: {
+    frameData: {
       name: "Kavalieros Coil Bike",
-      type: "mech",
-      img: "icons/svg/mech.svg"
-    },
-    // Applied after actor creation via system updates
-    stats: {
-      hp: 15,
-      armor: 1,
-      evasion: 12,
-      edef: 8,
-      speed: 16,
-      sensor: 10,
-      save: 10,
-      size: 1,
-      structure: 1,
-      stress: 1,
-      repairs: 2
-    },
-    detail: "<h2>Kavalieros Coil Bike</h2>" +
-      "<p>A nimble, rugged all-terrain bike captured from Aunic Kavalieros scouts. " +
-      "Designed for reconnaissance and fast strike operations far afield from the main force.</p>" +
-      "<p><b>Mounted Restrictions:</b> Cannot mount Heavy or Superheavy weapons. " +
-      "Speed is halved in difficult terrain. May use Main, Auxiliary, Thrown, or Deployable weapons while riding.</p>" +
-      "<p><b>Mount/Dismount:</b> Quick action to mount or dismount. While dismounted, use pilot stats and the bike is an independent object (Size 1, 15 HP, 1 Armor, 12 Evasion).</p>",
-    defaultItems: ["kavalieros_hardlight_rifle"]
+      type: "frame",
+      img: "icons/svg/mech.svg",
+      system: {
+        description: "<p>A nimble, rugged all-terrain bike captured from Aunic Kavalieros scouts. " +
+          "Designed for reconnaissance and fast strike operations far afield from the main force.</p>",
+        mechtype: ["Striker"],
+        mounts: ["Main", "Flex"],
+        stats: {
+          armor: 1,
+          edef: 8,
+          evasion: 12,
+          heatcap: 4,
+          hp: 15,
+          repcap: 2,
+          save: 10,
+          sensor_range: 10,
+          size: 1,
+          sp: 3,
+          speed: 16,
+          stress: 1,
+          structure: 1,
+          tech_attack: -2
+        },
+        traits: [],
+        core_system: {
+          name: "",
+          description: "",
+          activation: "",
+          deactivation: null,
+          use: null,
+          active_name: "",
+          active_effect: "",
+          active_synergies: [],
+          active_bonuses: [],
+          active_actions: [],
+          passive_name: "",
+          passive_effect: "",
+          passive_synergies: [],
+          passive_bonuses: [],
+          passive_actions: [],
+          deployables: [],
+          counters: [],
+          integrated: [],
+          tags: []
+        }
+      }
+    }
   }
 ];
 
@@ -255,8 +278,9 @@ export async function createFromPreset(presetId) {
 }
 
 /**
- * Create a vehicle (mech-type actor) from a vehicle preset and optionally
- * link it to a pilot. Also creates and embeds any default weapon items.
+ * Create a vehicle (mech-type actor) from a vehicle preset.
+ * Creates a Frame item, embeds it on a new mech actor, sets it in the loadout,
+ * and optionally links the mech to a pilot.
  *
  * @param {string} presetId - Vehicle preset ID
  * @param {Object} [options]
@@ -271,55 +295,42 @@ export async function createVehicle(presetId, options = {}) {
     return null;
   }
 
-  const actorData = foundry.utils.deepClone(preset.actorData);
-  if (options.name) actorData.name = options.name;
+  const name = options.name || preset.name;
 
   try {
-    const actor = await Actor.create(actorData);
-    if (!actor) return null;
+    // 1. Create the frame as a world-level item
+    const frameData = foundry.utils.deepClone(preset.frameData);
+    frameData.flags = { [MODULE_ID]: { preset: presetId, vehicleFrame: true } };
+    const worldFrame = await Item.create(frameData);
+    if (!worldFrame) {
+      ui.notifications.error("Failed to create frame item");
+      return null;
+    }
 
-    // Apply stats — the Lancer system uses dotted paths under system
-    const updates = {};
-    const s = preset.stats;
-    if (s.hp != null) updates["system.hp.max"] = s.hp;
-    if (s.hp != null) updates["system.hp.value"] = s.hp;
-    if (s.armor != null) updates["system.armor"] = s.armor;
-    if (s.evasion != null) updates["system.evasion"] = s.evasion;
-    if (s.edef != null) updates["system.edef"] = s.edef;
-    if (s.speed != null) updates["system.speed"] = s.speed;
-    if (s.sensor != null) updates["system.sensor_range"] = s.sensor;
-    if (s.save != null) updates["system.save"] = s.save;
-    if (s.size != null) updates["system.size"] = s.size;
-    if (s.structure != null) updates["system.structure.max"] = s.structure;
-    if (s.structure != null) updates["system.structure.value"] = s.structure;
-    if (s.stress != null) updates["system.stress.max"] = s.stress;
-    if (s.stress != null) updates["system.stress.value"] = s.stress;
-    if (s.repairs != null) updates["system.repairs.max"] = s.repairs;
-    if (s.repairs != null) updates["system.repairs.value"] = s.repairs;
-    if (preset.detail) updates["system.detail"] = preset.detail;
+    // 2. Create the mech actor
+    const actor = await Actor.create({
+      name,
+      type: "mech",
+      img: preset.frameData.img || "icons/svg/mech.svg"
+    });
+    if (!actor) {
+      await worldFrame.delete();
+      return null;
+    }
 
-    await actor.update(updates);
+    // 3. Embed the frame on the mech actor
+    const embedded = await actor.createEmbeddedDocuments("Item", [worldFrame.toObject()]);
+    const embeddedFrame = embedded?.[0];
 
-    // Link to pilot (bidirectional)
+    // 4. Set the frame in the mech's loadout
+    if (embeddedFrame) {
+      await actor.update({ "system.loadout.frame": embeddedFrame.uuid });
+    }
+
+    // 5. Link to pilot (bidirectional)
     if (options.pilot) {
       await actor.update({ "system.pilot": options.pilot.uuid });
       await options.pilot.update({ "system.active_mech": actor.uuid });
-    }
-
-    // Create and embed default weapon items
-    if (preset.defaultItems?.length) {
-      const itemDocs = [];
-      for (const itemPresetId of preset.defaultItems) {
-        const itemPreset = ITEM_PRESETS.find(p => p.id === itemPresetId);
-        if (itemPreset) {
-          const itemData = foundry.utils.deepClone(itemPreset.itemData);
-          itemData.flags = { [MODULE_ID]: { preset: itemPresetId } };
-          itemDocs.push(itemData);
-        }
-      }
-      if (itemDocs.length) {
-        await actor.createEmbeddedDocuments("Item", itemDocs);
-      }
     }
 
     ui.notifications.info(`Created vehicle: ${actor.name}`);
