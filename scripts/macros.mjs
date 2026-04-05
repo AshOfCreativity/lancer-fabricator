@@ -113,6 +113,69 @@ export function getAvailableMacros(actor) {
 }
 
 /**
+ * Build and return the macro script for setting the active mech.
+ * Uses game.user.character as the pilot, and the selected token as the mech.
+ */
+function buildActiveMechScript() {
+  return `
+const pilot = game.user.character;
+if (!pilot || pilot.type !== "pilot") {
+  return ui.notifications.warn("Your assigned character is not a LANCER pilot");
+}
+
+const token = canvas.tokens.controlled[0];
+if (!token) return ui.notifications.warn("Select a mech token first");
+
+const mech = token.actor;
+if (!mech || mech.type !== "mech") {
+  return ui.notifications.warn("Selected token is not a mech");
+}
+
+// Check if already active
+if (pilot.system.active_mech?.value === mech) {
+  return ui.notifications.info(mech.name + " is already your active mech");
+}
+
+// Set bidirectional link
+await pilot.update({ "system.active_mech": mech.uuid });
+await mech.update({ "system.pilot": pilot.uuid });
+ui.notifications.info("Active mech set to " + mech.name);
+`.trim();
+}
+
+/**
+ * Create the Set Active Mech macro in Foundry.
+ */
+export async function createActiveMechMacro(slot = null) {
+  const macroData = {
+    name: "[Fab] Set Active Mech",
+    type: "script",
+    img: "icons/svg/mech.svg",
+    command: buildActiveMechScript(),
+    flags: {
+      [MODULE_ID]: {
+        action: "setActiveMech"
+      }
+    }
+  };
+
+  let macro = game.macros.find(m =>
+    m.name === macroData.name &&
+    m.getFlag(MODULE_ID, "action") === "setActiveMech"
+  );
+
+  if (!macro) {
+    macro = await Macro.create(macroData);
+  }
+
+  if (slot !== null && macro) {
+    await game.user.assignHotbarMacro(macro, slot);
+  }
+
+  return macro;
+}
+
+/**
  * Build the script body for a macro. The macro is self-contained —
  * it resolves the actor from the selected token at runtime.
  */

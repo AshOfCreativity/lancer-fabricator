@@ -239,6 +239,33 @@
   <p class="transmuter-dropzone-hint">NPC Feature &rarr; Mech Weapon / System</p>
   <p class="transmuter-dropzone-hint">Mech Weapon / System &rarr; NPC Feature</p>
   <p class="transmuter-dropzone-sub">Drag from an actor sheet, compendium, or Items sidebar</p>
+
+  {{#if presets.length}}
+  <div class="transmuter-presets-section">
+    <h4 class="transmuter-presets-header"><i class="fas fa-cube"></i> Item Presets</h4>
+    {{#each presets}}
+    <button type="button" class="transmuter-preset-btn" data-preset-id="{{id}}">
+      <span class="transmuter-preset-name">{{name}}</span>
+      <span class="transmuter-preset-category">{{category}}</span>
+      <span class="transmuter-preset-desc">{{description}}</span>
+    </button>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if vehiclePresets.length}}
+  <div class="transmuter-presets-section">
+    <h4 class="transmuter-presets-header"><i class="fas fa-motorcycle"></i> Vehicles</h4>
+    {{#each vehiclePresets}}
+    <button type="button" class="transmuter-vehicle-btn" data-preset-id="{{id}}">
+      <span class="transmuter-preset-name">{{name}}</span>
+      <span class="transmuter-preset-category">{{category}}</span>
+      <span class="transmuter-preset-desc">{{description}}</span>
+    </button>
+    {{/each}}
+  </div>
+  {{/if}}
+
   <button type="button" class="transmuter-view-log transmuter-btn-secondary transmuter-dropzone-log">
     <i class="fas fa-clipboard-list"></i> Transmutation Log
   </button>

@@ -23,7 +23,7 @@ import {
 } from "./talent-dice-tracker.mjs";
 import { TalentDiceApp } from "./talent-dice-app.mjs";
 import { registerFabricatorFlows } from "./flow-integration.mjs";
-import { getAvailableMacros, createMacro, showMacroCreationDialog } from "./macros.mjs";
+import { getAvailableMacros, createMacro, showMacroCreationDialog, createActiveMechMacro } from "./macros.mjs";
 
 // Deployable Workshop
 import { registerDeployableSheet, FabricatorDeployableSheet } from "./deployable-sheet.mjs";
@@ -34,6 +34,7 @@ import { syncTalentWeapons, cleanupTalentWeapons } from "./talent-weapons.mjs";
 
 // Transmuter
 import { TransmuterApp, showTransmuter, registerTransmuterSettings, getTransmuterLog, clearTransmuterLog, showTransmuterLog } from "./transmuter-app.mjs";
+import { getPresetItems, getVehiclePresets, createFromPreset, createVehicle, showVehicleBuilder } from "./item-presets.mjs";
 
 const MODULE_ID = "lancer-fabricator";
 
@@ -127,6 +128,7 @@ Hooks.once("init", () => {
     getAvailableMacros,
     createMacro,
     showMacroCreationDialog,
+    createActiveMechMacro,
 
     // Data
     TALENT_DICE,
@@ -157,7 +159,14 @@ Hooks.once("init", () => {
     showTransmuter,
     getTransmuterLog,
     clearTransmuterLog,
-    showTransmuterLog
+    showTransmuterLog,
+
+    // Presets
+    getPresetItems,
+    getVehiclePresets,
+    createFromPreset,
+    createVehicle,
+    showVehicleBuilder
   };
 });
 

@@ -2,7 +2,7 @@
   "id": "lancer-fabricator",
   "title": "LANCER Fabricator",
   "description": "Toolkit module for LANCER: talent dice tracking & automation, deployable customization, and NPC/player content transmutation.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "compatibility": {
     "minimum": "11",
     "verified": "12"

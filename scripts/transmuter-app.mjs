@@ -6,6 +6,8 @@
  * are made by the user. No auto-mapping, no estimates, no suggestions.
  */
 
+import { ITEM_PRESETS, VEHICLE_PRESETS, createFromPreset, showVehicleBuilder } from "./item-presets.mjs";
+
 const MODULE_ID = "lancer-fabricator";
 
 const DAMAGE_TYPES = ["Kinetic", "Explosive", "Energy", "Burn", "Heat", "Variable"];
@@ -69,7 +71,9 @@ export class TransmuterApp extends Application {
       weaponTypes: WEAPON_TYPES,
       mountSizes: MOUNT_SIZES,
       npcFeatureTypes: NPC_FEATURE_TYPES,
-      activationTypes: ACTIVATION_TYPES
+      activationTypes: ACTIVATION_TYPES,
+      presets: ITEM_PRESETS,
+      vehiclePresets: VEHICLE_PRESETS
     };
   }
 
@@ -129,6 +133,18 @@ export class TransmuterApp extends Application {
       this.targetType = null;
       this.queue = [];
       this.render(false);
+    });
+
+    // Preset buttons
+    el.querySelectorAll(".transmuter-preset-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        await createFromPreset(btn.dataset.presetId);
+      });
+    });
+
+    // Vehicle preset buttons
+    el.querySelectorAll(".transmuter-vehicle-btn").forEach(btn => {
+      btn.addEventListener("click", () => showVehicleBuilder());
     });
 
     // View log button
