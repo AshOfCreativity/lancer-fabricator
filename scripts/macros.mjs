@@ -16,7 +16,7 @@
 
 import { TALENT_DICE, getTalentDie, PATTERN } from "./talent-dice-data.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 /**
  * Generate all available macros for a pilot actor's equipped talents.

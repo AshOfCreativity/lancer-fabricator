@@ -36,7 +36,7 @@ import { syncTalentWeapons, cleanupTalentWeapons } from "./talent-weapons.mjs";
 import { TransmuterApp, showTransmuter, registerTransmuterSettings, getTransmuterLog, clearTransmuterLog, showTransmuterLog } from "./transmuter-app.mjs";
 import { getPresetItems, getVehiclePresets, createFromPreset, createVehicle, showVehicleBuilder } from "./item-presets.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 // Track open apps per actor
 const openApps = new Map();

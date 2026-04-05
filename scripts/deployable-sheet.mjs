@@ -13,7 +13,7 @@ import { getOverrides, hasOverrides, saveOverride, clearOverrides, getOverridden
 import { saveTemplate, applyTemplate, showTemplatePicker, getTemplates, deleteTemplate } from "./deployable-templates.mjs";
 import { showDeployableBuilder } from "./deployable-builder.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 /**
  * Activation type options for select dropdowns.

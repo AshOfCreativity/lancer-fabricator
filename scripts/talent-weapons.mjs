@@ -15,7 +15,7 @@
 import { getTalentDie, PATTERN } from "./talent-dice-data.mjs";
 import { getDieState } from "./talent-dice-tracker.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 /**
  * Talent trigger weapon definitions.

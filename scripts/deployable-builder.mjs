@@ -8,7 +8,7 @@
 
 import { getTemplates, applyTemplate } from "./deployable-templates.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 /**
  * Preset stat blocks for common deployable archetypes.

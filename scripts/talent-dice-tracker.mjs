@@ -7,7 +7,7 @@
 
 import { TALENT_DICE, PATTERN, getTalentDie, getAllTrackedTalentIds } from "./talent-dice-data.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 const FLAG_KEY = "talentDice";
 
 /**

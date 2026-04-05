@@ -25,7 +25,7 @@ import {
   useTriggerAbility
 } from "./talent-dice-tracker.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 /**
  * Register our custom flow steps into the LANCER system.

@@ -24,7 +24,7 @@ import {
 } from "./talent-dice-tracker.mjs";
 import { showMacroCreationDialog } from "./macros.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 export class TalentDiceApp extends Application {
   constructor(actor, options = {}) {

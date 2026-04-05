@@ -12,7 +12,7 @@
  *   4. User clicks "Reset to Synced" → clearOverrides() removes all flags
  */
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 const OVERRIDES_KEY = "overrides";
 
 /**

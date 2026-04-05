@@ -8,7 +8,7 @@
 
 import { ITEM_PRESETS, VEHICLE_PRESETS, createFromPreset, showVehicleBuilder } from "./item-presets.mjs";
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 const DAMAGE_TYPES = ["Kinetic", "Explosive", "Energy", "Burn", "Heat", "Variable"];
 const RANGE_TYPES = ["Range", "Threat", "Blast", "Burst", "Cone", "Line"];

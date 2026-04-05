@@ -3,7 +3,7 @@
  * created directly from the transmuter without needing a source item.
  */
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 
 // ============================================
 // Item Presets (mech weapons, systems, etc.)

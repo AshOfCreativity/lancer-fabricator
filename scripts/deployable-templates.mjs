@@ -6,7 +6,7 @@
  * counters, activation types, detail text) for reuse across actors.
  */
 
-const MODULE_ID = "lancer-fabricator";
+const MODULE_ID = "lancer-fabricator-main";
 const SETTING_KEY = "deployableTemplates";
 
 /**
