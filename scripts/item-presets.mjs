@@ -5,6 +5,26 @@
 
 const MODULE_ID = "lancer-fabricator-main";
 
+export function buildMechSystemData(overrides = {}) {
+  return foundry.utils.mergeObject({
+    sp: 0,
+    type: "System",
+    license: "",
+    license_level: 0,
+    source: "",
+    effect: "",
+    actions: [],
+    tags: [],
+    counters: [],
+    bonuses: [],
+    synergies: [],
+    integrated: [],
+    deployables: [],
+    profiles: [],
+    size: ""
+  }, overrides, { inplace: false });
+}
+
 // ============================================
 // Item Presets (mech weapons, systems, etc.)
 // ============================================
@@ -19,20 +39,20 @@ export const ITEM_PRESETS = [
       name: "Bug Bomb",
       type: "mech_system",
       img: "icons/svg/explosion.svg",
-      system: {
-        sp: 0,
+      system: buildMechSystemData({
+        sp: 2,
         effect: "<p>Choose a point within <b>Range 20</b>. From that point, draw a <b>Line 30</b> in any direction. All characters and objects within the Line must succeed on an <b>Agility save</b> or take <b>1 Structure damage</b> and are reduced to <b>1 HP</b>. On a success, targets are reduced to <b>1 HP</b>. Objects smaller than <b>Size 5</b> in the Line are annihilated.</p>",
         actions: [{
           name: "Bug Bomb",
           activation: "Full",
-          detail: "Choose a point within Range 20. From that point, draw a Line 30 in any direction. Agility save or 1 Structure damage (reduced to 1 HP on success). Objects < Size 5 annihilated.",
+          detail: "Choose a point within Range 20. From that point, draw a Line 30 in any direction. Agility save: fail = 1 Structure damage + reduced to 1 HP; success = reduced to 1 HP. Objects < Size 5 annihilated.",
           trigger: ""
         }],
         tags: [
           { id: "tg_limited", name: "Limited", val: "1" },
           { id: "tg_unique", name: "Unique", val: "" }
         ]
-      }
+      })
     }
   },
   {

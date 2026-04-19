@@ -6,7 +6,7 @@
  * are made by the user. No auto-mapping, no estimates, no suggestions.
  */
 
-import { ITEM_PRESETS, VEHICLE_PRESETS, createFromPreset, showVehicleBuilder } from "./item-presets.mjs";
+import { ITEM_PRESETS, VEHICLE_PRESETS, createFromPreset, showVehicleBuilder, buildMechSystemData } from "./item-presets.mjs";
 
 const MODULE_ID = "lancer-fabricator-main";
 
@@ -423,12 +423,12 @@ export class TransmuterApp extends Application {
 
   _readMechSystemData(el, name) {
     const section = el.querySelector(".target-mech-system");
-    return this._wrapItemData(name, "mech_system", "icons/svg/cog.svg", {
+    return this._wrapItemData(name, "mech_system", "icons/svg/cog.svg", buildMechSystemData({
       sp: parseInt(section.querySelector('[name="system-sp"]')?.value) || 0,
       effect: section.querySelector('[name="system-effect"]')?.value || "",
       actions: this._readActionEntries(section),
       tags: this._readTagEntries(section)
-    });
+    }));
   }
 
   _readNpcFeatureData(el, name) {

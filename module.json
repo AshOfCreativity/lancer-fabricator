@@ -2,7 +2,7 @@
   "id": "lancer-fabricator-main",
   "title": "LANCER Fabricator",
   "description": "Toolkit module for LANCER: talent dice tracking & automation, deployable customization, and NPC/player content transmutation.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "url": "https://github.com/AshOfCreativity/lancer-fabricator",
   "manifest": "https://raw.githubusercontent.com/AshOfCreativity/lancer-fabricator/main/module.json",
   "download": "https://github.com/AshOfCreativity/lancer-fabricator/archive/refs/heads/main.zip",
