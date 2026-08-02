@@ -8,18 +8,38 @@ const SAVE_TYPES = {
 };
 
 /**
- * Post a save prompt card to chat. Any player or GM can click
- * to roll for actors they own. Uses LANCER's StatRollFlow.
+ * Post a save prompt card to chat. Works with tokens so duplicate
+ * actors (e.g. three Archers) each get their own roll button.
+ * Any player or GM can click to roll for tokens they own.
  */
-export async function promptSave({ saveType, title, effect, targetActorIds = [], dc }) {
+export async function promptSave({ saveType, title, effect, targetTokenIds = [], dc }) {
   const save = SAVE_TYPES[saveType];
   if (!save) {
     ui.notifications.error(`Unknown save type: ${saveType}`);
     return null;
   }
 
-  const targets = targetActorIds
-    .map(id => game.actors.get(id))
+  const scene = canvas.scene;
+  if (!scene) {
+    ui.notifications.warn("No active scene.");
+    return null;
+  }
+
+  const targets = targetTokenIds
+    .map(id => {
+      const tokenDoc = scene.tokens.get(id);
+      if (!tokenDoc) return null;
+      const actor = tokenDoc.actor;
+      if (!actor) return null;
+      return {
+        tokenId: id,
+        sceneId: scene.id,
+        actorId: actor.id,
+        name: tokenDoc.name || actor.name,
+        img: tokenDoc.texture?.src || actor.img || "icons/svg/mystery-man.svg",
+        result: null
+      };
+    })
     .filter(Boolean);
 
   if (targets.length === 0) {
@@ -33,12 +53,8 @@ export async function promptSave({ saveType, title, effect, targetActorIds = [],
     title: title || `${save.label} Save`,
     effect: effect || "",
     dc: dc ?? 10,
-    targets: targets.map(a => ({
-      actorId: a.id,
-      name: a.name,
-      img: a.img || "icons/svg/mystery-man.svg",
-      result: null
-    }))
+    sceneId: scene.id,
+    targets
   };
 
   const content = renderSaveCard(cardData);
@@ -60,11 +76,11 @@ function renderSaveCard(data) {
   const targetRows = data.targets.map(t => {
     const resultHTML = t.result
       ? renderResult(t.result)
-      : `<button class="fabricator-save-roll-btn" data-actor-id="${t.actorId}" type="button">
+      : `<button class="fabricator-save-roll-btn" data-token-id="${t.tokenId}" data-scene-id="${t.sceneId}" type="button">
            <i class="fas fa-dice-d20"></i> Roll ${data.saveLabel}
          </button>`;
 
-    return `<div class="fabricator-save-target" data-actor-id="${t.actorId}">
+    return `<div class="fabricator-save-target" data-token-id="${t.tokenId}">
       <img src="${t.img}" class="fabricator-save-portrait" alt="${escHTML(t.name)}" />
       <span class="fabricator-save-name">${escHTML(t.name)}</span>
       <span class="fabricator-save-action">${resultHTML}</span>
@@ -92,6 +108,17 @@ function renderResult(result) {
 }
 
 /**
+ * Resolve a token's actor from scene + token IDs.
+ */
+function resolveTokenActor(sceneId, tokenId) {
+  const scene = game.scenes.get(sceneId);
+  if (!scene) return null;
+  const tokenDoc = scene.tokens.get(tokenId);
+  if (!tokenDoc) return null;
+  return tokenDoc.actor;
+}
+
+/**
  * Register the chat message listener for save roll buttons.
  * Call once during module ready.
  */
@@ -103,11 +130,12 @@ export function registerSavePromptListeners() {
     html.find(".fabricator-save-roll-btn").on("click", async (event) => {
       event.preventDefault();
       const btn = event.currentTarget;
-      const actorId = btn.dataset.actorId;
-      const actor = game.actors.get(actorId);
+      const tokenId = btn.dataset.tokenId;
+      const sceneId = btn.dataset.sceneId;
 
+      const actor = resolveTokenActor(sceneId, tokenId);
       if (!actor) {
-        ui.notifications.error("Actor not found.");
+        ui.notifications.error("Token or actor not found.");
         return;
       }
 
@@ -128,7 +156,7 @@ export function registerSavePromptListeners() {
       const passed = total !== null ? total >= saveData.dc : null;
 
       const updatedData = foundry.utils.deepClone(saveData);
-      const target = updatedData.targets.find(t => t.actorId === actorId);
+      const target = updatedData.targets.find(t => t.tokenId === tokenId);
       if (target && total !== null) {
         target.result = { total, passed };
         await message.update({
@@ -141,8 +169,7 @@ export function registerSavePromptListeners() {
 }
 
 /**
- * Try to find the most recent roll result for an actor from chat.
- * StatRollFlow prints a card with the roll — we grab the total from it.
+ * Find the most recent roll for an actor from chat messages.
  */
 function findLastRollForActor(actor) {
   const messages = game.messages.contents;
@@ -160,6 +187,7 @@ function findLastRollForActor(actor) {
 
 /**
  * Show a dialog to configure and post a save prompt.
+ * Collects targeted or selected tokens — each token gets its own entry.
  */
 export async function showSavePromptDialog() {
   const saveOptions = Object.entries(SAVE_TYPES)
@@ -172,13 +200,13 @@ export async function showSavePromptDialog() {
   const actorRows = allTokens
     .filter(t => t.actor)
     .map(t => `<label class="fabricator-save-target-row">
-        <input type="checkbox" name="target" value="${t.actor.id}" checked />
-        ${escHTML(t.actor.name)}
+        <input type="checkbox" name="target" value="${t.document.id}" checked />
+        ${escHTML(t.document.name || t.actor.name)}
       </label>`)
     .join("");
 
   const noTargets = allTokens.length === 0
-    ? `<p class="hint">Select or target tokens first, or enter actor names below.</p>`
+    ? `<p class="hint">Select or target tokens first.</p>`
     : "";
 
   return new Promise(resolve => {
@@ -219,16 +247,16 @@ export async function showSavePromptDialog() {
             const title = html.find('[name="title"]').val()?.trim() || "";
             const effect = html.find('[name="effect"]').val()?.trim() || "";
             const checked = html.find('[name="target"]:checked');
-            const targetActorIds = [];
-            checked.each((_, el) => targetActorIds.push(el.value));
+            const targetTokenIds = [];
+            checked.each((_, el) => targetTokenIds.push(el.value));
 
-            if (targetActorIds.length === 0) {
+            if (targetTokenIds.length === 0) {
               ui.notifications.warn("Select at least one target.");
               resolve(null);
               return;
             }
 
-            const msg = await promptSave({ saveType, title, effect, targetActorIds, dc });
+            const msg = await promptSave({ saveType, title, effect, targetTokenIds, dc });
             resolve(msg);
           }
         },
