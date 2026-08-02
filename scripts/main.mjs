@@ -1,7 +1,7 @@
 /**
  * LANCER Fabricator - Main Entry Point
  *
- * v0.3.0 — Talent Dice Tracker + Deployable Workshop + NPC/Player Transmuter
+ * v0.7.0 — Talent Dice Tracker + Deployable Workshop + NPC/Player Transmuter + Save Prompts
  */
 
 import { TALENT_DICE, PATTERN, getTalentDie, getAllTrackedTalentIds } from "./talent-dice-data.mjs";
@@ -35,6 +35,9 @@ import { syncTalentWeapons, cleanupTalentWeapons } from "./talent-weapons.mjs";
 // Transmuter
 import { TransmuterApp, showTransmuter, registerTransmuterSettings, getTransmuterLog, clearTransmuterLog, showTransmuterLog } from "./transmuter-app.mjs";
 import { getPresetItems, getVehiclePresets, createFromPreset, createVehicle, showVehicleBuilder } from "./item-presets.mjs";
+
+// Save Prompts
+import { promptSave, showSavePromptDialog, registerSavePromptListeners } from "./save-prompts.mjs";
 
 const MODULE_ID = "lancer-fabricator-main";
 
@@ -165,7 +168,11 @@ Hooks.once("init", () => {
     getVehiclePresets,
     createFromPreset,
     createVehicle,
-    showVehicleBuilder
+    showVehicleBuilder,
+
+    // Save Prompts
+    promptSave,
+    showSavePromptDialog
   };
 });
 
@@ -176,6 +183,8 @@ Hooks.on("lancer.registerFlows", (flowSteps, flows) => {
 
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | Ready`);
+
+  registerSavePromptListeners();
 
   // Auto-initialize trackers and sync talent weapons for all mech actors
   for (const actor of game.actors) {
@@ -221,6 +230,13 @@ Hooks.on("getSceneControlButtons", (controls) => {
       icon: "fas fa-exchange-alt",
       button: true,
       onClick: () => showTransmuter()
+    });
+    tokenControl.tools.push({
+      name: "save-prompt",
+      title: "Save Prompt",
+      icon: "fas fa-shield-alt",
+      button: true,
+      onClick: () => showSavePromptDialog()
     });
   }
 });
