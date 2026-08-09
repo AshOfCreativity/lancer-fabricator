@@ -39,6 +39,35 @@ import { getPresetItems, getVehiclePresets, createFromPreset, createVehicle, sho
 // Save Prompts
 import { promptSave, showSavePromptDialog, registerSavePromptListeners } from "./save-prompts.mjs";
 
+// NPC Feature Statuses
+import { NPC_STATUSES, STATUS_WHERE, STATUS_TYPE, getStatusDef, findStatusesForFeature, hasModifiersEquipped } from "./npc-status-data.mjs";
+import { EFFECT_TYPE, EFFECT_PRESETS, analyzeFeatureText, getEffectSummary } from "./npc-status-effects.mjs";
+import {
+  registerNpcStatuses,
+  registerCustomNpcStatuses,
+  registerStatusHooks,
+  getFeatureStatus,
+  setFeatureStatus,
+  clearFeatureStatus,
+  toggleFeatureStatus,
+  setStatusStacks,
+  setStatusStage,
+  setStatusTarget,
+  promptTargetSelection,
+  syncTokenStatuses,
+  getActiveStatuses,
+  getActiveStatusesForAction,
+  buildStatusPill
+} from "./npc-status-tracker.mjs";
+import {
+  registerCustomStatusSettings,
+  getCustomStatuses,
+  saveCustomStatus,
+  deleteCustomStatus,
+  findStatusForFeatureMerged,
+  openStatusConfig
+} from "./npc-status-config.mjs";
+
 const MODULE_ID = "lancer-fabricator-main";
 
 // Track open apps per actor
@@ -103,6 +132,10 @@ Hooks.once("init", () => {
   registerTemplateSettings();
   registerSyncProtectionHook();
   registerTransmuterSettings();
+
+  // NPC Feature Statuses
+  registerCustomStatusSettings();
+  registerStatusHooks();
 
   // Expose public API
   game.modules.get(MODULE_ID).api = {
@@ -172,7 +205,36 @@ Hooks.once("init", () => {
 
     // Save Prompts
     promptSave,
-    showSavePromptDialog
+    showSavePromptDialog,
+
+    // NPC Feature Statuses
+    NPC_STATUSES,
+    STATUS_WHERE,
+    STATUS_TYPE,
+    EFFECT_TYPE,
+    EFFECT_PRESETS,
+    getStatusDef,
+    findStatusesForFeature,
+    findStatusForFeatureMerged,
+    hasModifiersEquipped,
+    analyzeFeatureText,
+    getEffectSummary,
+    getFeatureStatus,
+    setFeatureStatus,
+    clearFeatureStatus,
+    toggleFeatureStatus,
+    setStatusStacks,
+    setStatusStage,
+    setStatusTarget,
+    syncTokenStatuses,
+    getActiveStatuses,
+    getActiveStatusesForAction,
+    buildStatusPill,
+    promptTargetSelection,
+    getCustomStatuses,
+    saveCustomStatus,
+    deleteCustomStatus,
+    openStatusConfig
   };
 });
 
@@ -185,6 +247,7 @@ Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | Ready`);
 
   registerSavePromptListeners();
+  registerCustomNpcStatuses();
 
   // Auto-initialize trackers and sync talent weapons for all mech actors
   for (const actor of game.actors) {
