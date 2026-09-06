@@ -194,6 +194,21 @@ export async function showSavePromptDialog() {
     .map(([key, val]) => `<option value="${key}">${val.label}</option>`)
     .join("");
 
+  // Build a list of actors that have a save target (mechs, NPCs, deployables, pilots)
+  const saveActors = game.actors
+    .filter(a => a.system?.save != null && a.isOwner)
+    .map(a => ({ id: a.id, name: a.name, save: a.system.save, type: a.type }));
+
+  // Pre-select: controlled token's actor, then active combatant, then first in list
+  const controlledActor = canvas.tokens?.controlled?.[0]?.actor
+    ?? game.combat?.combatant?.actor;
+  const defaultActorId = controlledActor?.id ?? saveActors[0]?.id ?? "";
+  const derivedDC = controlledActor?.system?.save ?? saveActors[0]?.save ?? 10;
+
+  const sourceOptions = saveActors
+    .map(a => `<option value="${a.id}" ${a.id === defaultActorId ? "selected" : ""}>${escHTML(a.name)} (${a.type}, Save ${a.save})</option>`)
+    .join("");
+
   const tokenTargets = canvas.tokens?.controlled ?? [];
   const targetedTokens = [...game.user.targets];
   const allTokens = targetedTokens.length > 0 ? targetedTokens : tokenTargets;
@@ -210,17 +225,26 @@ export async function showSavePromptDialog() {
     : "";
 
   return new Promise(resolve => {
-    new Dialog({
+    const dlg = new Dialog({
       title: "Save Prompt",
       content: `
         <form class="fabricator-save-dialog">
+          <div class="form-group">
+            <label>Save Source</label>
+            <div class="fabricator-save-source-row">
+              <select name="saveSource">${sourceOptions}</select>
+              <button type="button" class="fabricator-save-refresh" title="Refresh from selected token">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+          </div>
           <div class="form-group">
             <label>Save Type</label>
             <select name="saveType">${saveOptions}</select>
           </div>
           <div class="form-group">
             <label>DC</label>
-            <input type="number" name="dc" value="10" min="1" max="30" />
+            <input type="number" name="dc" value="${derivedDC}" min="1" max="30" />
           </div>
           <div class="form-group">
             <label>Title (optional)</label>
@@ -266,7 +290,35 @@ export async function showSavePromptDialog() {
         }
       },
       default: "prompt",
-      close: () => resolve(null)
+      close: () => resolve(null),
+      render: (html) => {
+        // When save source changes, update DC to match that actor's save target
+        html.find('[name="saveSource"]').on("change", (ev) => {
+          const actorId = ev.currentTarget.value;
+          const actor = game.actors.get(actorId);
+          if (actor?.system?.save != null) {
+            html.find('[name="dc"]').val(actor.system.save);
+          }
+        });
+
+        // Refresh button: re-detect controlled token and update the dropdown + DC
+        html.find(".fabricator-save-refresh").on("click", (ev) => {
+          ev.preventDefault();
+          const token = canvas.tokens?.controlled?.[0];
+          if (!token?.actor) {
+            ui.notifications.info("Select a token to refresh save source.");
+            return;
+          }
+          const actor = token.actor;
+          const $select = html.find('[name="saveSource"]');
+          if ($select.find(`option[value="${actor.id}"]`).length > 0) {
+            $select.val(actor.id).trigger("change");
+          } else {
+            $select.append(`<option value="${actor.id}">${escHTML(actor.name)} (${actor.type}, Save ${actor.system?.save ?? "?"})</option>`);
+            $select.val(actor.id).trigger("change");
+          }
+        });
+      }
     }).render(true);
   });
 }

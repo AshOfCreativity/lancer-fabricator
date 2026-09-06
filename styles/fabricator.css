@@ -1837,6 +1837,33 @@
   margin: 0;
 }
 
+.fabricator-save-source-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.fabricator-save-source-row select {
+  flex: 1;
+}
+
+.fabricator-save-refresh {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #555;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fabricator-save-refresh:hover {
+  background: rgba(255,255,255,0.1);
+}
+
 /* ============================================
    NPC Feature Status Config Dialog
    ============================================ */
