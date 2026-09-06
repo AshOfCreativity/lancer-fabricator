@@ -2053,3 +2053,25 @@
   color: #faa;
 }
 
+
+/* Deployable deploy button on mech sheet */
+.fabricator-deploy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin: 4px 0;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: 1px solid var(--color-border-light-1, #555);
+  border-radius: 3px;
+  background: rgba(100, 180, 100, 0.15);
+  color: var(--color-text-light-0, #ccc);
+}
+.fabricator-deploy-btn:hover {
+  background: rgba(100, 180, 100, 0.35);
+  color: #fff;
+}

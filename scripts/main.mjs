@@ -30,6 +30,7 @@ import { registerDeployableSheet, FabricatorDeployableSheet, deployToScene } fro
 import { registerSyncProtectionHook, getOverrides, hasOverrides, saveOverride, clearOverrides } from "./deployable-sync.mjs";
 import { registerTemplateSettings, saveTemplate, applyTemplate, getTemplates, deleteTemplate, showTemplatePicker } from "./deployable-templates.mjs";
 import { showDeployableBuilder, getPresets } from "./deployable-builder.mjs";
+import { registerDeployerHooks } from "./deployable-deployer.mjs";
 import { syncTalentWeapons, cleanupTalentWeapons } from "./talent-weapons.mjs";
 
 // Transmuter
@@ -133,6 +134,9 @@ Hooks.once("init", () => {
   registerTemplateSettings();
   registerSyncProtectionHook();
   registerTransmuterSettings();
+
+  // Deployable one-click deploy
+  registerDeployerHooks();
 
   // NPC Feature Statuses
   registerCustomStatusSettings();
