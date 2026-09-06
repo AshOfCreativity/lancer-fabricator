@@ -1,4 +1,4 @@
-import { STATUS_WHERE, STATUS_TYPE, findStatusesForFeature } from "./npc-status-data.mjs";
+import { STATUS_WHERE, STATUS_TYPE, findStatusesForFeature, autoGenerateStatus } from "./npc-status-data.mjs";
 import { EFFECT_TYPE, EFFECT_PRESETS, analyzeFeatureText, getEffectSummary } from "./npc-status-effects.mjs";
 
 const MODULE_ID = "lancer-fabricator-main";
@@ -67,7 +67,8 @@ export function findStatusForFeatureMerged(item) {
   const custom = getCustomStatusForLid(lid);
   if (custom) return [custom];
 
-  return [];
+  const auto = autoGenerateStatus(item);
+  return auto ? [auto] : [];
 }
 
 // ─── Status Config Dialog ───────────────────────────────────

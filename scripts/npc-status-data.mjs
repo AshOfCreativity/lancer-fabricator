@@ -1,3 +1,5 @@
+import { analyzeFeatureText, EFFECT_TYPE } from "./npc-status-effects.mjs";
+
 const MODULE_ID = "lancer-fabricator-main";
 const ICON_PATH = `modules/${MODULE_ID}/assets/icons/statuses`;
 
@@ -1625,16 +1627,91 @@ export const NPC_STATUSES = [
 
   // ── MBT (OWS) ────────────────────────────────────────────
   {
+    id: "fab_composite_armor_facing",
+    name: "Armored Facing",
+    lid: "npc_mbt_composite_armor",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.TOGGLE,
+    icon: `${ICON_PATH}/shield.svg`,
+    description: "Directional 6 Armor + Resistance to AoE from chosen facing; changes on move",
+    effects: [
+      { type: "resistance", params: { type: "resistance", damageType: "all", target: "self" } },
+      { type: "custom", params: { text: "Attacks from armored facing: 6 Armor + Resistance to Blast/Burst/Line/Cone. AP/burn/Shredded damage reduced by 2 from this facing. Facing changes on move/Boost." } }
+    ]
+  },
+  {
+    id: "fab_tank_shock",
+    name: "Tank Shock",
+    lid: "npc_mbt_tank_shock",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.PASSIVE,
+    icon: `${ICON_PATH}/armed.svg`,
+    description: "Boost through characters: Hull save or damage + Prone (1/turn per target)",
+    effects: [
+      { type: "custom", params: { text: "Ignores engagement, passes through characters < Size 3. On Boost through: Hull save or {4/5/6} kinetic + Prone (1/turn)." } }
+    ]
+  },
+  {
+    id: "fab_mobile_bunker",
+    name: "Mobile Bunker",
+    lid: "npc_mbt_mobile_bunker",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.PASSIVE,
+    icon: `${ICON_PATH}/shield.svg`,
+    description: "Adjacent allies gain hard cover + Resistance to AoE damage",
+    effects: [
+      { type: "custom", params: { text: "Adjacent allied characters can use MBT as hard cover. Characters gain Resistance to Blast/Burst/Line/Cone damage while benefiting." } }
+    ]
+  },
+  {
+    id: "fab_secondary_gunner",
+    name: "Secondary Gunner",
+    lid: "npc_mbt_secondary_gunner",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.PASSIVE,
+    icon: `${ICON_PATH}/armed.svg`,
+    description: "Secondary Weapon fires even while Jammed or Stunned",
+    effects: [
+      { type: "custom", params: { text: "MBT may attack with Secondary Weapon even while Jammed or Stunned" } }
+    ]
+  },
+  {
+    id: "fab_marker_nexus_mark",
+    name: "Marker Nexus (Lock + Impair)",
+    lid: "npc_mbt_marker_nexus",
+    where: STATUS_WHERE.TARGET,
+    statusType: STATUS_TYPE.TARGET_REF,
+    icon: `${ICON_PATH}/mark.svg`,
+    description: "On hit: Systems save or Lock On + Impaired until end of target's next turn",
+    effects: [
+      { type: "apply_condition", params: { condition: "lockon", target: "attack_target" } },
+      { type: "apply_condition", params: { condition: "impaired", target: "attack_target" } }
+    ]
+  },
+  {
+    id: "fab_skylight_antiair",
+    name: "SKYLIGHT Anti-Air Lock",
+    lid: "npc_mbt_skylight_anti-air_laser",
+    where: STATUS_WHERE.TARGET,
+    statusType: STATUS_TYPE.TARGET_REF,
+    icon: `${ICON_PATH}/lock.svg`,
+    description: "On hit vs flying: Agility save or +1d6 damage / forced landing + grounded",
+    effects: [
+      { type: "custom", params: { text: "If target is flying: Agility save or choose: +1d6 bonus damage, OR land immediately (no fall damage) and unable to fly until end of next turn" } }
+    ]
+  },
+  {
     id: "fab_siege_mode",
     name: "Siege Mode Active",
     lid: "npc_mbt_siege_mode",
     where: STATUS_WHERE.SELF,
     statusType: STATUS_TYPE.TOGGLE,
     icon: `${ICON_PATH}/lock.svg`,
-    description: "MBT Immobilized; gains enhanced firepower",
+    description: "MBT Immobilized; Main Gun gains Arcing + 5 Range; can't fire within Range 3",
     effects: [
       { type: "apply_condition", params: { condition: "immobilized", target: "self" } },
-      { type: "custom", params: { text: "Enhanced firepower while deployed" } }
+      { type: "modify_attack", params: { weaponName: "Main Gun", ap: false, accuracy: 0, difficulty: 0, rangeOverride: "+5 Range, gains Arcing" } },
+      { type: "custom", params: { text: "Cannot make ranged attacks within Range 3 with Main Gun while active" } }
     ]
   },
   {
@@ -1644,9 +1721,60 @@ export const NPC_STATUSES = [
     where: STATUS_WHERE.ZONE,
     statusType: STATUS_TYPE.TOGGLE,
     icon: `${ICON_PATH}/zone.svg`,
-    description: "Creates obscuring smoke cover area",
+    description: "Blast 2 smoke within Range 5; soft cover; clears Lock On on entry for allies",
     effects: [
-      { type: "zone_effect", params: { area: "Burst 2", allyEffect: "Soft cover", hostileEffect: "Obscured", attackModifier: "" } }
+      { type: "zone_effect", params: { area: "Blast 2 within Range 5", allyEffect: "Soft cover; clears Lock On on first entry", hostileEffect: "Soft cover", attackModifier: "" } }
+    ]
+  },
+
+  // ── Marine (OWS Template) ────────────────────────────────
+  {
+    id: "fab_first_on_last_off",
+    name: "First On, Last Off",
+    lid: "npc_marine_first_on_last_off",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.PASSIVE,
+    icon: `${ICON_PATH}/shield.svg`,
+    description: "Reaction attacks against Marine have +1 Difficulty",
+    effects: [
+      { type: "custom", params: { text: "Attacks against Marine made as reactions (e.g. Overwatch) gain +1 Difficulty" } }
+    ]
+  },
+  {
+    id: "fab_pointman_plating",
+    name: "Pointman Plating",
+    lid: "npc_marine_pointman_plating",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.PASSIVE,
+    icon: `${ICON_PATH}/shield.svg`,
+    description: "Guardian trait; adjacent allies gain hard cover (or soft cover from all directions if already Guardian)",
+    effects: [
+      { type: "custom", params: { text: "Grants Guardian if not already present. If already Guardian, additionally grants soft cover to adjacent allies from all directions." } }
+    ]
+  },
+  {
+    id: "fab_deck_anchors",
+    name: "Deck Anchors Available",
+    lid: "npc_marine_deck_anchors",
+    where: STATUS_WHERE.SELF,
+    statusType: STATUS_TYPE.CHARGE,
+    icon: `${ICON_PATH}/lock.svg`,
+    description: "Reaction (1/round): ignore involuntary movement from attacks/saves",
+    effects: [
+      { type: "grant_reaction", params: { reactionName: "Deck Anchors", trigger: "Involuntarily moved by attack or failed save (not teleportation)", limit: "1/round" } }
+    ]
+  },
+  {
+    id: "fab_captive_spike",
+    name: "Captive Spike (Impaled)",
+    lid: "npc_marine_captive_spike",
+    where: STATUS_WHERE.TARGET,
+    statusType: STATUS_TYPE.TARGET_REF,
+    icon: `${ICON_PATH}/lock.svg`,
+    description: "Full action: Hull save or auto-grappled + Impaired; ranged attacks may hit impaled target instead",
+    effects: [
+      { type: "apply_condition", params: { condition: "impaired", target: "attack_target" } },
+      { type: "custom", params: { text: "Target impaled: auto-grappled (Marine always larger party), Impaired for duration. Break free: Hull save as full action. Ranged/melee attacks on Marine: 1d6, on 4+ auto-hits grappled target instead (half damage/heat). Marine becomes Slowed." } }
     ]
   },
 
@@ -1802,6 +1930,102 @@ for (const s of NPC_STATUSES) {
   }
 }
 
+// ─── Auto-Generated Status Cache ────────────────────────────
+
+const _autoCache = new Map();
+const _autoNullCache = new Set();
+
+const EFFECT_ICON_MAP = {
+  [EFFECT_TYPE.APPLY_CONDITION]: "lock",
+  [EFFECT_TYPE.ZONE_EFFECT]: "zone",
+  [EFFECT_TYPE.GRANT_REACTION]: "armed",
+  [EFFECT_TYPE.BONUS_DAMAGE]: "flame",
+  [EFFECT_TYPE.EXTRA_ATTACK]: "mark",
+  [EFFECT_TYPE.MODIFY_ATTACK]: "mark",
+  [EFFECT_TYPE.RESISTANCE]: "shield",
+  [EFFECT_TYPE.STEALTH]: "cloak",
+  [EFFECT_TYPE.DEFERRED]: "timer",
+  [EFFECT_TYPE.STAT_CHANGE]: "stack",
+  [EFFECT_TYPE.CUSTOM]: "eye"
+};
+
+function inferStatusType(suggestions) {
+  for (const s of suggestions) {
+    if (s.type === EFFECT_TYPE.APPLY_CONDITION && s.params?.target === "attack_target") {
+      return { statusType: STATUS_TYPE.TARGET_REF, where: STATUS_WHERE.TARGET };
+    }
+  }
+  for (const s of suggestions) {
+    if (s.type === EFFECT_TYPE.ZONE_EFFECT) {
+      return { statusType: STATUS_TYPE.TOGGLE, where: STATUS_WHERE.ZONE };
+    }
+  }
+  for (const s of suggestions) {
+    if (s.type === EFFECT_TYPE.DEFERRED) {
+      return { statusType: STATUS_TYPE.DEFERRED, where: STATUS_WHERE.SELF };
+    }
+  }
+  return { statusType: STATUS_TYPE.TOGGLE, where: STATUS_WHERE.SELF };
+}
+
+function pickIcon(suggestions) {
+  for (const s of suggestions) {
+    const icon = EFFECT_ICON_MAP[s.type];
+    if (icon) return icon;
+  }
+  return "eye";
+}
+
+function sanitizeLid(lid) {
+  return lid.replace(/[^a-z0-9_]/gi, "_").substring(0, 80);
+}
+
+export function autoGenerateStatus(item) {
+  if (item.type !== "npc_feature") return null;
+  const lid = item.system?.lid;
+  if (!lid) return null;
+  if (_statusByLid.has(lid)) return null;
+  if (_autoNullCache.has(lid)) return null;
+  if (_autoCache.has(lid)) return _autoCache.get(lid);
+
+  const effectText = item.system?.effect ?? item.system?.description ?? "";
+  const suggestions = analyzeFeatureText(effectText);
+  if (suggestions.length === 0) {
+    _autoNullCache.add(lid);
+    return null;
+  }
+
+  const { statusType, where } = inferStatusType(suggestions);
+  const iconKey = pickIcon(suggestions);
+  const effects = suggestions.map(s => ({ type: s.type, params: s.params }));
+  const description = suggestions.map(s => s.matchedText).join("; ");
+
+  const def = {
+    id: `fab_auto_${sanitizeLid(lid)}`,
+    name: item.name,
+    lid,
+    where,
+    statusType,
+    icon: `${ICON_PATH}/${iconKey}.svg`,
+    description,
+    effects,
+    autoGenerated: true
+  };
+
+  _autoCache.set(lid, def);
+  _statusById.set(def.id, def);
+  return def;
+}
+
+export function getAutoGeneratedDef(statusId) {
+  for (const def of _autoCache.values()) {
+    if (def.id === statusId) return def;
+  }
+  return null;
+}
+
+// ─── Lookups ────────────────────────────────────────────────
+
 export function getStatusDef(statusId) {
   return _statusById.get(statusId) ?? null;
 }
@@ -1810,7 +2034,10 @@ export function findStatusesForFeature(item) {
   if (item.type !== "npc_feature") return [];
   const lid = item.system?.lid;
   if (!lid) return [];
-  return _statusByLid.get(lid) ?? [];
+  const builtIn = _statusByLid.get(lid);
+  if (builtIn) return builtIn;
+  const auto = autoGenerateStatus(item);
+  return auto ? [auto] : [];
 }
 
 export function getStatusesForActor(actor) {
@@ -1821,7 +2048,12 @@ export function getStatusesForActor(actor) {
     const lid = item.system?.lid;
     if (!lid) continue;
     const defs = _statusByLid.get(lid);
-    if (defs) result.push(...defs);
+    if (defs) {
+      result.push(...defs);
+    } else {
+      const auto = autoGenerateStatus(item);
+      if (auto) result.push(auto);
+    }
   }
   return result;
 }
