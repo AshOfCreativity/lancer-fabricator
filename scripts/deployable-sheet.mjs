@@ -75,10 +75,11 @@ export class FabricatorDeployableSheet extends ActorSheet {
     data.cost = sys.cost ?? 1;
     data.instances = sys.instances ?? 1;
 
-    // Actions with index for editing
+    // Actions with index for editing and fire capability
     data.actions = (sys.actions || []).map((action, index) => ({
       ...action,
       index,
+      canFire: true,
       activationOptions: ACTION_TYPES.map(t => ({
         ...t,
         selected: t.value === (action.activation || "Quick")
@@ -142,6 +143,12 @@ export class FabricatorDeployableSheet extends ActorSheet {
 
     // Builder
     html.find(".fabricator-new-deployable").click(this._onNewDeployable.bind(this));
+
+    // Action firing
+    html.find(".fabricator-fire-action").click(this._onFireAction.bind(this));
+
+    // Deploy to scene
+    html.find(".fabricator-deploy-to-scene").click(this._onDeployToScene.bind(this));
   }
 
   /**
@@ -295,10 +302,75 @@ export class FabricatorDeployableSheet extends ActorSheet {
 
   async _onNewDeployable(event) {
     event.preventDefault();
-    // Try to find the deployer from the current actor's deployer ref
     const deployerUuid = this.actor.system?.deployer?.id;
     const deployer = deployerUuid ? await fromUuid(deployerUuid) : null;
     await showDeployableBuilder({ deployer });
+  }
+
+  // ---- Action Firing ----
+
+  async _onFireAction(event) {
+    event.preventDefault();
+    const index = parseInt(event.currentTarget.dataset.index);
+    const action = this.actor.system.actions?.[index];
+    if (!action) return;
+
+    if (action.tech_attack) {
+      return this.actor.beginBasicTechAttackFlow(action.name);
+    }
+    if (action.damage?.length > 0 || action.range?.length > 0) {
+      return this.actor.beginBasicAttackFlow(action.name);
+    }
+
+    // No attack data — post a chat card
+    const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+    let content = `<h3>${action.name}</h3>`;
+    if (action.activation) content += `<p><strong>${action.activation} Action</strong></p>`;
+    if (action.trigger) content += `<p><em>Trigger:</em> ${action.trigger}</p>`;
+    if (action.detail) content += `<div>${action.detail}</div>`;
+    await ChatMessage.create({ speaker, content });
+  }
+
+  // ---- Deploy to Scene ----
+
+  async _onDeployToScene(event) {
+    event.preventDefault();
+    if (!canvas?.scene) {
+      ui.notifications.warn("No active scene");
+      return;
+    }
+
+    const deployerUuid = this.actor.system?.deployer?.id;
+    let x = canvas.dimensions.width / 2;
+    let y = canvas.dimensions.height / 2;
+
+    if (deployerUuid) {
+      const deployer = await fromUuid(deployerUuid);
+      if (deployer) {
+        const deployerToken = canvas.tokens.placeables.find(
+          t => t.actor?.uuid === deployer.uuid || t.actor?.id === deployer.id
+        );
+        if (deployerToken) {
+          const gridSize = canvas.grid.size;
+          x = deployerToken.x + gridSize;
+          y = deployerToken.y;
+        }
+      }
+    }
+
+    const tokenData = await this.actor.getTokenDocument({ x, y });
+    const [token] = await canvas.scene.createEmbeddedDocuments("Token", [tokenData.toObject()]);
+
+    if (game.combat) {
+      await game.combat.createEmbeddedDocuments("Combatant", [{
+        tokenId: token.id,
+        actorId: this.actor.id,
+        hidden: false
+      }]);
+      ui.notifications.info(`${this.actor.name} deployed and added to combat`);
+    } else {
+      ui.notifications.info(`${this.actor.name} deployed to scene`);
+    }
   }
 }
 
@@ -356,6 +428,49 @@ async function promptTemplateName(defaultName) {
       close: () => resolve(null)
     }).render(true);
   });
+}
+
+/**
+ * Programmatic deploy-to-scene for any deployable actor.
+ */
+export async function deployToScene(actor) {
+  if (!canvas?.scene) {
+    ui.notifications.warn("No active scene");
+    return null;
+  }
+
+  const deployerUuid = actor.system?.deployer?.id;
+  let x = canvas.dimensions.width / 2;
+  let y = canvas.dimensions.height / 2;
+
+  if (deployerUuid) {
+    const deployer = await fromUuid(deployerUuid);
+    if (deployer) {
+      const deployerToken = canvas.tokens.placeables.find(
+        t => t.actor?.uuid === deployer.uuid || t.actor?.id === deployer.id
+      );
+      if (deployerToken) {
+        const gridSize = canvas.grid.size;
+        x = deployerToken.x + gridSize;
+        y = deployerToken.y;
+      }
+    }
+  }
+
+  const tokenData = await actor.getTokenDocument({ x, y });
+  const [token] = await canvas.scene.createEmbeddedDocuments("Token", [tokenData.toObject()]);
+
+  if (game.combat) {
+    await game.combat.createEmbeddedDocuments("Combatant", [{
+      tokenId: token.id,
+      actorId: actor.id,
+      hidden: false
+    }]);
+    ui.notifications.info(`${actor.name} deployed and added to combat`);
+  } else {
+    ui.notifications.info(`${actor.name} deployed to scene`);
+  }
+  return token;
 }
 
 async function showTemplateManager() {

@@ -26,7 +26,7 @@ import { registerFabricatorFlows } from "./flow-integration.mjs";
 import { getAvailableMacros, createMacro, showMacroCreationDialog, createActiveMechMacro } from "./macros.mjs";
 
 // Deployable Workshop
-import { registerDeployableSheet, FabricatorDeployableSheet } from "./deployable-sheet.mjs";
+import { registerDeployableSheet, FabricatorDeployableSheet, deployToScene } from "./deployable-sheet.mjs";
 import { registerSyncProtectionHook, getOverrides, hasOverrides, saveOverride, clearOverrides } from "./deployable-sync.mjs";
 import { registerTemplateSettings, saveTemplate, applyTemplate, getTemplates, deleteTemplate, showTemplatePicker } from "./deployable-templates.mjs";
 import { showDeployableBuilder, getPresets } from "./deployable-builder.mjs";
@@ -189,6 +189,7 @@ Hooks.once("init", () => {
     hasOverrides,
     saveOverride,
     clearOverrides,
+    deployToScene,
 
     // Transmuter
     TransmuterApp,

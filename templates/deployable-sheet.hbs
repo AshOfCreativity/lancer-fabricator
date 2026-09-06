@@ -17,6 +17,7 @@
       </div>
     </div>
     <div class="fabricator-header-actions">
+      <button type="button" class="fabricator-deploy-to-scene" title="Deploy to scene"><i class="fas fa-parachute-box"></i> Deploy</button>
       <button type="button" class="fabricator-save-template" title="Save as template"><i class="fas fa-save"></i></button>
       <button type="button" class="fabricator-apply-template" title="Apply template"><i class="fas fa-file-import"></i></button>
       <button type="button" class="fabricator-new-deployable" title="Create new deployable"><i class="fas fa-plus"></i></button>
@@ -108,6 +109,11 @@
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
           </select>
+          {{#if canFire}}
+          <button type="button" class="fabricator-fire-action" data-index="{{index}}" title="Fire action">
+            <i class="fas fa-bolt"></i>
+          </button>
+          {{/if}}
           <button type="button" class="fabricator-delete-action" data-index="{{index}}" title="Delete action">
             <i class="fas fa-trash"></i>
           </button>
