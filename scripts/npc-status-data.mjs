@@ -1813,6 +1813,19 @@ export function findStatusesForFeature(item) {
   return _statusByLid.get(lid) ?? [];
 }
 
+export function getStatusesForActor(actor) {
+  if (!actor || actor.type !== "npc") return [];
+  const result = [];
+  for (const item of actor.items) {
+    if (item.type !== "npc_feature") continue;
+    const lid = item.system?.lid;
+    if (!lid) continue;
+    const defs = _statusByLid.get(lid);
+    if (defs) result.push(...defs);
+  }
+  return result;
+}
+
 export function hasModifiersEquipped(actor, statusDef) {
   if (!statusDef.modifierLids?.length) return [];
   const equipped = [];

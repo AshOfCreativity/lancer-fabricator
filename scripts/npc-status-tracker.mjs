@@ -2,6 +2,7 @@ import {
   NPC_STATUSES,
   STATUS_TYPE,
   getStatusDef,
+  getStatusesForActor,
   hasModifiersEquipped
 } from "./npc-status-data.mjs";
 import { getCustomStatuses, findStatusForFeatureMerged } from "./npc-status-config.mjs";
@@ -13,16 +14,26 @@ let _syncing = false;
 // ─── Registration ───────────────────────────────────────────
 
 export function registerNpcStatuses() {
-  for (const status of NPC_STATUSES) {
-    if (!CONFIG.statusEffects.find(s => s.id === status.id)) {
-      CONFIG.statusEffects.push({
-        id: status.id,
-        name: `[F] ${status.name}`,
-        img: status.icon
-      });
-    }
+  // No-op: statuses are now registered per-actor via ensureStatusesForActor
+  // and filtered in renderTokenHUD. This function is kept for API compatibility.
+}
+
+function ensureStatusRegistered(statusDef) {
+  if (!CONFIG.statusEffects.find(s => s.id === statusDef.id)) {
+    CONFIG.statusEffects.push({
+      id: statusDef.id,
+      name: `[F] ${statusDef.name}`,
+      img: statusDef.icon
+    });
   }
-  console.log(`${MODULE_ID} | Registered ${NPC_STATUSES.length} NPC feature statuses`);
+}
+
+function ensureStatusesForActor(actor) {
+  if (!actor || actor.type !== "npc") return;
+  const relevant = getStatusesForActor(actor);
+  for (const def of relevant) {
+    ensureStatusRegistered(def);
+  }
 }
 
 export function registerCustomNpcStatuses() {
@@ -275,6 +286,29 @@ async function removeTargetStatusIcon(item, targetData) {
   }
 }
 
+// ─── Auto-Activation ──────────────────────────────────────
+
+export async function autoActivatePassives(actor) {
+  if (!actor || actor.type !== "npc") return;
+  ensureStatusesForActor(actor);
+  _syncing = true;
+  try {
+    for (const item of actor.items) {
+      if (item.type !== "npc_feature") continue;
+      const defs = findStatusForFeatureMerged(item);
+      for (const def of defs) {
+        if (def.statusType !== STATUS_TYPE.PASSIVE) continue;
+        const current = getFeatureStatus(item);
+        if (current?.active) continue;
+        await item.setFlag(MODULE_ID, "status", buildDefaultState(def));
+      }
+    }
+  } finally {
+    _syncing = false;
+  }
+  await syncTokenStatuses(actor);
+}
+
 // ─── Token Status Sync ─────────────────────────────────────
 
 export async function syncTokenStatuses(actor) {
@@ -364,6 +398,40 @@ export function buildStatusPill(activeStatus) {
 export function registerStatusHooks() {
   Hooks.on("lancer.statusInitComplete", registerNpcStatuses);
   Hooks.on("lancer.statusesReady", registerNpcStatuses);
+
+  Hooks.on("renderTokenHUD", (hud, html, data) => {
+    const actor = hud.object?.actor;
+    if (!actor || actor.type !== "npc") return;
+    ensureStatusesForActor(actor);
+    const relevantIds = new Set(getStatusesForActor(actor).map(d => d.id));
+    try {
+      const customs = getCustomStatuses();
+      for (const def of Object.values(customs)) {
+        const lid = def.lid ?? def.lids?.[0];
+        if (lid && actor.items.some(i => i.type === "npc_feature" && i.system?.lid === lid)) {
+          relevantIds.add(def.id);
+        }
+      }
+    } catch { /* settings not ready */ }
+    // Also keep any already-active fab_ statuses (e.g. TARGET_REF applied from another actor)
+    for (const effect of actor.effects) {
+      for (const sid of effect.statuses) {
+        if (sid.startsWith("fab_")) relevantIds.add(sid);
+      }
+    }
+    html.find('.status-effects .effect-control').each(function () {
+      const statusId = this.dataset.statusId;
+      if (statusId?.startsWith("fab_") && !relevantIds.has(statusId)) {
+        $(this).remove();
+      }
+    });
+  });
+
+  Hooks.on("createCombatant", async (combatant) => {
+    const actor = combatant.actor;
+    if (!actor || actor.type !== "npc") return;
+    await autoActivatePassives(actor);
+  });
 
   Hooks.on("createActiveEffect", async (effect, options, userId) => {
     if (_syncing || game.user.id !== userId) return;

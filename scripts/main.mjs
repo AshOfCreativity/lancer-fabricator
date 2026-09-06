@@ -40,7 +40,7 @@ import { getPresetItems, getVehiclePresets, createFromPreset, createVehicle, sho
 import { promptSave, showSavePromptDialog, registerSavePromptListeners } from "./save-prompts.mjs";
 
 // NPC Feature Statuses
-import { NPC_STATUSES, STATUS_WHERE, STATUS_TYPE, getStatusDef, findStatusesForFeature, hasModifiersEquipped } from "./npc-status-data.mjs";
+import { NPC_STATUSES, STATUS_WHERE, STATUS_TYPE, getStatusDef, getStatusesForActor, findStatusesForFeature, hasModifiersEquipped } from "./npc-status-data.mjs";
 import { EFFECT_TYPE, EFFECT_PRESETS, analyzeFeatureText, getEffectSummary } from "./npc-status-effects.mjs";
 import {
   registerNpcStatuses,
@@ -55,6 +55,7 @@ import {
   setStatusTarget,
   promptTargetSelection,
   syncTokenStatuses,
+  autoActivatePassives,
   getActiveStatuses,
   getActiveStatusesForAction,
   buildStatusPill
@@ -227,6 +228,7 @@ Hooks.once("init", () => {
     setStatusStage,
     setStatusTarget,
     syncTokenStatuses,
+    autoActivatePassives,
     getActiveStatuses,
     getActiveStatusesForAction,
     buildStatusPill,
@@ -258,6 +260,16 @@ Hooks.once("ready", () => {
         }
         await syncTalentWeapons(actor);
       });
+    }
+  }
+
+  // Auto-activate passive NPC statuses for combatants already in combat
+  if (game.combat) {
+    for (const combatant of game.combat.combatants) {
+      const actor = combatant.actor;
+      if (actor?.type === "npc" && actor.isOwner) {
+        autoActivatePassives(actor);
+      }
     }
   }
 
