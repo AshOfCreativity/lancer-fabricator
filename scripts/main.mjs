@@ -22,6 +22,7 @@ import {
   renderDiePips
 } from "./talent-dice-tracker.mjs";
 import { TalentDiceApp } from "./talent-dice-app.mjs";
+import { CoreBonusApp } from "./core-bonus-app.mjs";
 import { registerFabricatorFlows } from "./flow-integration.mjs";
 import { getAvailableMacros, createMacro, showMacroCreationDialog, createActiveMechMacro } from "./macros.mjs";
 
@@ -122,6 +123,39 @@ function openTalentDiceForSelected() {
   }
 }
 
+// Track open core bonus apps per actor
+const openCBApps = new Map();
+
+function openCoreBonusApp(actor) {
+  if (!actor || actor.type !== "mech") {
+    ui.notifications.warn("Select a mech to view Core Bonuses");
+    return;
+  }
+  if (openCBApps.has(actor.id)) {
+    openCBApps.get(actor.id).render(true);
+    return;
+  }
+  const app = new CoreBonusApp(actor);
+  openCBApps.set(actor.id, app);
+  const originalClose = app.close.bind(app);
+  app.close = async (...args) => {
+    openCBApps.delete(actor.id);
+    return originalClose(...args);
+  };
+  app.render(true);
+}
+
+function openCoreBonusForSelected() {
+  const token = canvas.tokens.controlled[0];
+  if (!token) {
+    ui.notifications.warn("Select a token first");
+    return;
+  }
+  const actor = token.actor;
+  if (actor?.type === "mech") openCoreBonusApp(actor);
+  else ui.notifications.warn("Select a mech token");
+}
+
 // ============================================
 // Hooks
 // ============================================
@@ -179,6 +213,11 @@ Hooks.once("init", () => {
     // Talent Weapons
     syncTalentWeapons,
     cleanupTalentWeapons,
+
+    // Core Bonuses
+    CoreBonusApp,
+    openCoreBonusApp,
+    openCoreBonusForSelected,
 
     // Deployable Workshop
     FabricatorDeployableSheet,
@@ -315,6 +354,13 @@ Hooks.on("getSceneControlButtons", (controls) => {
       icon: "fas fa-exchange-alt",
       button: true,
       onClick: () => showTransmuter()
+    });
+    tokenControl.tools.push({
+      name: "core-bonuses",
+      title: "Core Bonuses",
+      icon: "fas fa-microchip",
+      button: true,
+      onClick: () => openCoreBonusForSelected()
     });
     tokenControl.tools.push({
       name: "save-prompt",

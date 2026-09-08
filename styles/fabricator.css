@@ -283,6 +283,97 @@
   padding: 8px;
 }
 
+/* ---- Core Bonuses ---- */
+
+.fabricator-cb-section {
+  margin-top: 12px;
+  border-top: 2px solid #4fc3f7;
+  padding-top: 4px;
+}
+
+.fabricator-cb-header {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4fc3f7;
+  padding: 4px 0 6px;
+}
+
+.fabricator-cb-card {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-left: 3px solid #4fc3f7;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+}
+
+.fabricator-cb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fabricator-cb-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid #444;
+}
+
+.fabricator-cb-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fabricator-cb-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fabricator-cb-mfr {
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fabricator-cb-post {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #888;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.fabricator-cb-post:hover {
+  color: #4fc3f7;
+  border-color: #4fc3f7;
+}
+
+.fabricator-cb-effect {
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.fabricator-cb-mounted {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid #333;
+}
+
 /* ---- Chat Cards ---- */
 
 .fabricator-chat-card {

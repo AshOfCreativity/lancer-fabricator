@@ -86,6 +86,15 @@ function detectMechTalents(mech) {
     }
   }
 
+  // Filter out talents whose die mechanic requires a higher rank than the pilot has
+  for (const talentId of matched) {
+    const def = TALENT_DICE[talentId];
+    const minRank = def.minRank ?? 1;
+    if (getMechTalentRank(mech, talentId) < minRank) {
+      matched.delete(talentId);
+    }
+  }
+
   return [...matched];
 }
 
