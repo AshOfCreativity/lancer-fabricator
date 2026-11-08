@@ -2193,3 +2193,77 @@
   background: rgba(100, 180, 100, 0.35);
   color: #fff;
 }
+
+/* ===== Actor Refresh dialog ===== */
+.fab-actor-refresh {
+  font-family: var(--font-primary, sans-serif);
+  color: #d8d8d8;
+}
+
+.fab-ar-intro {
+  font-size: 12px;
+  color: #a0a0a0;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.fab-ar-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.fab-ar-table th,
+.fab-ar-table td {
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid #333;
+}
+
+.fab-ar-table th {
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10px;
+}
+
+.fab-ar-table td input[type="checkbox"] {
+  margin: 0;
+}
+
+.fab-ar-type {
+  color: #888;
+  font-size: 11px;
+}
+
+.fab-ar-status {
+  font-size: 11px;
+}
+
+.fab-ar-status.fab-ar-stale {
+  color: #f39c12;
+  font-weight: 600;
+}
+
+.fab-ar-status.fab-ar-up-to-date {
+  color: #5a7fa3;
+}
+
+.fab-ar-status.fab-ar-source-missing {
+  color: #ff6b6b;
+}
+
+.fab-ar-status.fab-ar-no-source {
+  color: #666;
+}
+
+.fab-ar-summary {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #888;
+  padding-top: 4px;
+  border-top: 1px solid #333;
+}
