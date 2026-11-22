@@ -2267,36 +2267,3 @@
   padding-top: 4px;
   border-top: 1px solid #333;
 }
-
-/* ======== Metavault Bridge ======== */
-.fab-metavault-import {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 4px 2px;
-}
-
-.fab-metavault-import .fab-mv-intro {
-  margin: 0 0 4px 0;
-  font-size: 12px;
-  color: #aaa;
-}
-
-.fab-metavault-import .fab-mv-section {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 6px 8px;
-  border: 1px solid #333;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.fab-metavault-import .fab-mv-section label {
-  font-size: 12px;
-  color: #ccc;
-}
-
-.fab-metavault-import .fab-mv-hint {
-  margin: 0;
-}
